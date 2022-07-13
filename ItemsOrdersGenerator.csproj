@@ -9,4 +9,10 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="OverpassLibrary">
+      <HintPath>..\OverpassLibrary\bin\Debug\netcoreapp3.1\OverpassLibrary.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
