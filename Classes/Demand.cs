@@ -57,12 +57,12 @@ namespace ItemOrderDemonstration.Classes
                 return builder.ToString();
             }
         }
-        public static void ThrowIntervalException(TimeSpan minTime, TimeSpan maxTime, int timeWins, TimeSpan interval)
+        /*public static void ThrowIntervalException(TimeSpan minTime, TimeSpan maxTime, int timeWins, TimeSpan interval) // wtf
             => throw new BadIntervalException("Слишком большой промежуток, либо слишком большое количество временных окон. " +
                     "Максимально возможный промежуток между минимумом и максимумом - " + 
-                    GetPartBetween(minTime, maxTime, timeWins).ToString(@"hh\:mm") + 
+                    GetOnePartIntervalBetween(minTime, maxTime, timeWins).ToString(Program.TIME_FORMAT) + 
                     ", текущий промежуток - " +
-                    interval.ToString(@"hh\:mm"));
+                    interval.ToString(Program.TIME_FORMAT));*/
 
         public static IEnumerable<Tuple<TimeSpan, TimeSpan>> RandomTimespans(Random randObj,
             TimeSpan minimumTime, TimeSpan maximumTime,
@@ -70,7 +70,7 @@ namespace ItemOrderDemonstration.Classes
             int timeWindowsCount)
         {
             if (!(CheckIfIntervalMeetsRange(minimumTime, maximumTime, intervalBetweenFromTo, timeWindowsCount)))
-                ThrowIntervalException(minimumTime, maximumTime, timeWindowsCount, intervalBetweenFromTo);
+                throw new BadIntervalException(minimumTime, maximumTime, intervalBetweenFromTo, timeWindowsCount);
 
             TimeSpan from, to;
             TimeSpan interval = (maximumTime - minimumTime) / timeWindowsCount;
@@ -104,21 +104,32 @@ namespace ItemOrderDemonstration.Classes
             TimeSpan temp = new TimeSpan((long)(ticksFrom + (ticksTo - ticksFrom) * ranNum));
             return temp.Subtract(new TimeSpan(0, 0, 0, temp.Seconds, temp.Milliseconds));
         }
-        public static TimeSpan GetPartBetween(TimeSpan from, TimeSpan to, int divide)
-            => (to - from) / divide;
+        public static TimeSpan GetOnePartIntervalBetween(TimeSpan from, TimeSpan to, int divideIntoParts)
+            => (to - from) / divideIntoParts;
         public static bool CheckIfIntervalMeetsRange(TimeSpan minimumTime, TimeSpan maximumTime,
             TimeSpan intervalBetweenFromTo,
             int timeWindowsCount)
         {
-            TimeSpan interval = GetPartBetween(minimumTime, maximumTime, timeWindowsCount);
+            TimeSpan interval = GetOnePartIntervalBetween(minimumTime, maximumTime, timeWindowsCount);
             return interval > intervalBetweenFromTo;
         }
     }
 
     public class BadIntervalException : Exception
     {
-        public BadIntervalException(string message) : base(message)
+        private const string BAD_INTERVAL_MSG = 
+                    "Слишком большой промежуток, либо слишком большое количество временных окон. " +
+                    "Максимально возможный промежуток между минимумом и максимумом - %0" +
+                    ", текущий промежуток - %1";
+        public override string Message { get; }
+        public BadIntervalException(TimeSpan minimalTime, TimeSpan maximumTime, TimeSpan interval, int timeWindows)
         {
+            StringBuilder resultErrorMessageBuilder = new StringBuilder(BAD_INTERVAL_MSG);
+            Message = resultErrorMessageBuilder
+                .Replace("%0", Demand.GetOnePartIntervalBetween(minimalTime, maximumTime, timeWindows)
+                    .ToString(Program.TIME_FORMAT))
+                .Replace("%1", interval.ToString(Program.TIME_FORMAT))
+                .ToString();
         }
     }
 }

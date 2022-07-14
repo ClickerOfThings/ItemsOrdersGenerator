@@ -31,7 +31,7 @@ namespace ItemOrderDemonstration.Classes
 
         private const int TIME_WINDOW_COUNT_MIN = 1;
         private const int TIME_WINDOW_COUNT_MAX = 4;
-        public static void GenerateOrdersFile(List<Item> items, List<osmClass> listOfPoints,
+        public static void GenerateOrdersFile(List<Item> items, List<OsmClass> listOfPoints,
             DateTime ordersDateTime, string ordersFileName, int pointsCount,
             Tuple<int, int> minMaxTimeWindows,
             Tuple<int, int> minMaxItemsPerWindow, Tuple<int, int> minMaxItemCountPerPosition,
@@ -54,7 +54,7 @@ namespace ItemOrderDemonstration.Classes
                 {
                     RetailPoint = new RetailPoint
                     {
-                        Address = listOfPoints[i].FullAddress.ToUpper(),
+                        Address = listOfPoints[i].FullAddressString.ToUpper(),
                         //Id = listOfPoints[i].Id,
                         Id = Guid.NewGuid(),
                         Name = listOfPoints[i].Name.ToUpper(),

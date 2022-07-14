@@ -32,6 +32,8 @@ namespace ItemOrderDemonstration.Classes
             }
             foreach (PropertyInfo property in resultConfig.GetType().GetProperties())
             {
+                if (property.GetValue(resultConfig) is null)
+                    continue;
                 foreach (Attribute attribute in property.GetCustomAttributes())
                 {
                     IPropertyValidation validation = attribute as IPropertyValidation;
@@ -99,7 +101,7 @@ namespace ItemOrderDemonstration.Classes
         [JsonProperty]
         [Description("Количество используемых в генерации точек")]
         [CheckNumberForMin(1)]
-        public int PointsCount { get; set; }
+        public int? PointsCount { get; set; }
         [JsonProperty]
         [Description("Минимальное и максимальное количество временных окон")]
         [CheckNumberTupleForMin(1)]
@@ -121,12 +123,12 @@ namespace ItemOrderDemonstration.Classes
         [CheckTimeSpanTupleForMin(0, 0)]
         public Tuple<TimeSpan, TimeSpan> TimeRange { get; set; }
         [CheckTimeSpanForMin(0, 0)]
-        public TimeSpan IntervalBetweenTimeRange { get; set; }
+        public TimeSpan? IntervalBetweenTimeRange { get; set; }
         [JsonProperty(PropertyName = "IntervalBetweenTimeRange")]
         [Description("Интервал между минимальным и максимальным временем")]
         public string IntervalBetweenTimeRangeView
         {
-            get => IntervalBetweenTimeRange.ToString(@"hh\:mm");
+            get => IntervalBetweenTimeRange?.ToString(Program.TIME_FORMAT) ?? "";
             set
             {
                 TimeSpan temp = TimeSpan.Parse(value);
@@ -212,8 +214,8 @@ namespace ItemOrderDemonstration.Classes
             if (tuple is null)
                 writer.WriteNull();
             JObject obj = new JObject();
-            obj.Add("From", tuple.Item1.ToString(@"hh\:mm"));
-            obj.Add("To", tuple.Item2.Days == 1 ? "24:00" : tuple.Item2.ToString(@"hh\:mm"));
+            obj.Add("From", tuple.Item1.ToString(Program.TIME_FORMAT));
+            obj.Add("To", tuple.Item2.Days == 1 ? "24:00" : tuple.Item2.ToString(Program.TIME_FORMAT));
             obj.WriteTo(writer);
             return;
         }

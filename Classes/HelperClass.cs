@@ -38,7 +38,7 @@ namespace ItemOrderDemonstration.Classes
             }
             return result;
         }
-        public static List<osmClass> GetAllPoints(osmClass cityObj, string[] placeTypes)
+        public static List<OsmClass> GetAllPoints(OsmClass cityObj, string[] placeTypes)
         {
             return OverpassMethods.GetAllPlacesInCity(cityObj, placeTypes);
         }

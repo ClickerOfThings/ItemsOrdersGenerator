@@ -22,6 +22,8 @@ namespace ItemOrderDemonstration
     {
         const string DEFAULT_ITEMS_FILE = "items.xml";
         const string DEFAULT_ORDERS_FILE = "orders.xml";
+
+        public const string TIME_FORMAT = @"hh\:mm";
         public static Config CurrentConfig { get; set; }
         static void Main(string[] args)
         {
@@ -142,14 +144,14 @@ namespace ItemOrderDemonstration
         }
         private static void GenerateOrdersFile()
         {
-            osmClass searchObj = ConsoleInput.GetOsmObjectFromUser();
+            OsmClass searchObj = ConsoleInput.GetOsmObjectFromUser();
             if (searchObj is null)
                 return;
             string[] types = ConsoleInput.GetPlaceTypesFromUser();
             if (types is null)
                 return;
             Console.WriteLine("Ищем точки, подождите...");
-            List<osmClass> pointsList = new List<osmClass>();
+            List<OsmClass> pointsList = new List<OsmClass>();
             try
             {
                 pointsList = HelperClass.GetAllPoints(searchObj, types);

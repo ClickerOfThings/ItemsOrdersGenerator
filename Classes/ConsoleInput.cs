@@ -200,10 +200,10 @@ namespace ItemOrderDemonstration.Classes
             return resultPath;
         }
 
-        public static osmClass GetOsmObjectFromUser()
+        public static OsmClass GetOsmObjectFromUser()
         {
             bool exitFunction = false;
-            osmClass searchObj = null;
+            OsmClass searchObj = null;
             string input;
 
             string cityNameFromConf = Program.CurrentConfig?.CityName;
@@ -222,7 +222,7 @@ namespace ItemOrderDemonstration.Classes
                 if (ComparePoints(rect.NorthEastCorner, rect.SouthWestCorner) == 1)
                     throw new BadConfigException("В прямоугольнике северо-восточный угол больше юго-восточного");
                 else
-                    searchObj = new osmClass
+                    searchObj = new OsmClass
                     {
                         CityNorthEast = rect.NorthEastCorner,
                         CitySouthWest = rect.SouthWestCorner
@@ -263,7 +263,7 @@ namespace ItemOrderDemonstration.Classes
                         if (GetCoordinatesFromConsole(out northEast, out southWest))
                         {
                             exitFunction = true;
-                            searchObj = new osmClass
+                            searchObj = new OsmClass
                             {
                                 CityNorthEast = northEast,
                                 CitySouthWest = southWest
@@ -282,12 +282,12 @@ namespace ItemOrderDemonstration.Classes
             }
             return searchObj;
         }
-        public static osmClass GetOneCityFromList(List<osmClass> listToGetFrom)
+        public static OsmClass GetOneCityFromList(List<OsmClass> listToGetFrom)
         {
             StringBuilder allowedInputBuilder = new StringBuilder();
-            Dictionary<string, osmClass> charToCity = new Dictionary<string, osmClass>();
+            Dictionary<string, OsmClass> charToCity = new Dictionary<string, OsmClass>();
             int indexToCity = 1;
-            foreach (osmClass city in listToGetFrom)
+            foreach (OsmClass city in listToGetFrom)
             {
                 allowedInputBuilder.Append(" " + indexToCity);
                 charToCity.Add(indexToCity.ToString(), city);
@@ -296,11 +296,11 @@ namespace ItemOrderDemonstration.Classes
             }
             return charToCity[GetInputFromConsole(allowedInputBuilder.ToString())];
         }
-        private static osmClass SearchCity(string cityName)
+        private static OsmClass SearchCity(string cityName)
         {
-            osmClass returnObj;
+            OsmClass returnObj;
             Console.WriteLine("Ищем город, подождите...");
-            List<osmClass> objs = OverpassMethods.GetCityInfo(cityName);
+            List<OsmClass> objs = OverpassMethods.GetCityInfo(cityName);
             returnObj = objs[0];
             if (objs.Count > 1)
             {
@@ -384,16 +384,16 @@ namespace ItemOrderDemonstration.Classes
             Dictionary<string, List<Item>> correctXmlFiles = HelperClass.GetAllCorrectXmlItemFilesInAppFolder();
             Dictionary<string, string> charToXml = new Dictionary<string, string>();
 
-            if (Program.CurrentConfig != null)
+            string filePathFromConfig = Program.CurrentConfig?.ItemsFilePathInput;
+            if (!string.IsNullOrEmpty(filePathFromConfig))
             {
-                string filePath = Program.CurrentConfig.ItemsFilePathInput;
-                if (!File.Exists(filePath))
+                if (!File.Exists(filePathFromConfig))
                 {
-                    throw new BadConfigException("Файла с товарами по пути " + filePath + " не существует");
+                    throw new BadConfigException("Файла с товарами по пути " + filePathFromConfig + " не существует");
                 }
                 try
                 {
-                    resultList = XmlGenerator.DeserializeItemsFromFileToList(filePath);
+                    resultList = XmlGenerator.DeserializeItemsFromFileToList(filePathFromConfig);
                 }
                 catch(System.InvalidOperationException ex)
                 {
@@ -475,16 +475,24 @@ namespace ItemOrderDemonstration.Classes
             out Tuple<int, int> itemsPerWindow, out Tuple<int, int> itemsCountPerPosition,
             out Tuple<TimeSpan, TimeSpan> timespanFromTo, out TimeSpan intervalBetweenFromTo)
         {
-            #region Config Values Set And Check
-            points = Program.CurrentConfig?.PointsCount ?? -1;
-            if (points > maxPoints)
-                throw new BadConfigException("Количество указанных точек (" + points + ") " +
+            MinsMaxStart:
+            #region Config Values Set And Check);
+            int? configPoints = Program.CurrentConfig?.PointsCount;
+            if (configPoints != null)
+            {
+                if (configPoints.Value > maxPoints)
+                    throw new BadConfigException("Количество указанных точек (" + configPoints.Value + ") " +
                     "больше найденных точек (" + maxPoints + ")");
-            minMaxWindows = Program.CurrentConfig?.MinMaxTimeWindows ?? null;
-            if (minMaxWindows != null && minMaxWindows.Item1 > minMaxWindows.Item2)
+                else
+                    points = configPoints.Value;
+            }
+            else
+                points = -1;
+            minMaxWindows = Program.CurrentConfig?.MinMaxTimeWindows;
+            if (minMaxWindows?.Item1 > minMaxWindows?.Item2)
                 throw new BadConfigException("Минимальное количество окон (" + minMaxWindows.Item1 + ") " +
                     "больше максимального количества (" + minMaxWindows.Item2 + ")");
-            itemsPerWindow = Program.CurrentConfig?.MinMaxItemsPerWindow ?? null;
+            itemsPerWindow = Program.CurrentConfig?.MinMaxItemsPerWindow;
             if (itemsPerWindow != null)
                 if (itemsPerWindow.Item1 > minMaxWindows.Item2)
                     throw new BadConfigException("Минимальное количество товаров на окно (" + itemsPerWindow.Item1 + ") " +
@@ -492,34 +500,32 @@ namespace ItemOrderDemonstration.Classes
                 else if (itemsPerWindow.Item2 > maxItems)
                     throw new BadConfigException("Максимальное количество товаров на окно (" + itemsPerWindow.Item2 + ") " +
                         "больше максимально возможных товаров (" + maxItems + ")");
-            itemsCountPerPosition = Program.CurrentConfig?.MinMaxItemsCountPerPosition ?? null;
-            if (itemsCountPerPosition != null && itemsCountPerPosition.Item1 > itemsCountPerPosition.Item2)
+            itemsCountPerPosition = Program.CurrentConfig?.MinMaxItemsCountPerPosition;
+            if (itemsCountPerPosition?.Item1 > itemsCountPerPosition?.Item2)
                 throw new BadConfigException("Минимальное количество товаров на позицию (" + itemsCountPerPosition.Item1 + ") " +
                     "больше максимального количества (" + itemsCountPerPosition.Item2 + ")");
-            timespanFromTo = Program.CurrentConfig?.TimeRange ?? null;
-            if (timespanFromTo != null && timespanFromTo.Item1 > timespanFromTo.Item2)
+            timespanFromTo = Program.CurrentConfig?.TimeRange;
+            if (timespanFromTo?.Item1 > timespanFromTo?.Item2)
                 throw new BadConfigException("Минимальное время в промежутке " +
-                    "(" + timespanFromTo.Item1.ToString(@"hh\:mm") + ") " +
+                    "(" + timespanFromTo.Item1.ToString(Program.TIME_FORMAT) + ") " +
                     "больше максимального времени " +
-                    "(" + timespanFromTo.Item2.ToString(@"hh\:mm") + ")");
-            intervalBetweenFromTo = Program.CurrentConfig?.IntervalBetweenTimeRange ?? TimeSpan.MinValue;
-            if (intervalBetweenFromTo != TimeSpan.MinValue &&
-                !Demand.CheckIfIntervalMeetsRange(timespanFromTo.Item1, timespanFromTo.Item2,
-                            intervalBetweenFromTo, itemsPerWindow.Item2))
-                try
-                {
-                    Demand.ThrowIntervalException(timespanFromTo.Item1, timespanFromTo.Item2,
-                    itemsPerWindow.Item2, intervalBetweenFromTo);
-                }
-                catch(BadIntervalException ex)
-                {
-                    throw new BadConfigException(ex.Message); // костыль по конвертированию исключения
-                                                              // интервала в исключение конфига
-                }
+                    "(" + timespanFromTo.Item2.ToString(Program.TIME_FORMAT) + ")");
+            TimeSpan? configIntervalBetweenFromTo = Program.CurrentConfig?.IntervalBetweenTimeRange;
+            if (configIntervalBetweenFromTo != null)
+            {
+                if (!Demand.CheckIfIntervalMeetsRange(timespanFromTo.Item1, timespanFromTo.Item2,
+                            configIntervalBetweenFromTo.Value, itemsPerWindow.Item2))
+                    throw new BadIntervalException(timespanFromTo.Item1, timespanFromTo.Item2,
+                    configIntervalBetweenFromTo.Value, itemsPerWindow.Item2);
+                else
+                    intervalBetweenFromTo = configIntervalBetweenFromTo.Value;
+            }
+            else
+                intervalBetweenFromTo = TimeSpan.MinValue;
             #endregion
 
             Console.WriteLine("Ввод данных для случайной генерации");
-            if (points == -1)
+            if (configPoints is null)
             {
                 Console.WriteLine("Введите количество точек (максимум " + maxPoints + " точек включительно)");
                 points = GetIntInRange(1, maxPoints);
@@ -540,29 +546,27 @@ namespace ItemOrderDemonstration.Classes
                         Console.WriteLine("Минимальное и максимальное время (от и до) во временном окне");
                         timespanFromTo = GetMinMaxHMTime();
                     }
-                    if (intervalBetweenFromTo == TimeSpan.MinValue)
+                    if (configIntervalBetweenFromTo is null)
                     {
                         Console.Clear();
                         Console.WriteLine("Интервал между минимальным и максимальным временем (от и до)");
                         intervalBetweenFromTo = GetHMTimeFromConsole();
                     }
-                    for (int i = minMaxWindows.Item1; i <= minMaxWindows.Item2; i++)
-                    {
-                        if (!Demand.CheckIfIntervalMeetsRange(timespanFromTo.Item1, timespanFromTo.Item2,
-                            intervalBetweenFromTo, i))
-                            Demand.ThrowIntervalException(timespanFromTo.Item1, timespanFromTo.Item2,
-                                i, intervalBetweenFromTo);
-                    }
+                    if (!Demand.CheckIfIntervalMeetsRange(timespanFromTo.Item1, timespanFromTo.Item2,
+                        intervalBetweenFromTo, minMaxWindows.Item2))
+                        throw new BadIntervalException(timespanFromTo.Item1, timespanFromTo.Item2,
+                            intervalBetweenFromTo, minMaxWindows.Item2);
                     break;
                 }
                 catch (BadIntervalException ex)
                 {
                     if (Program.CurrentConfig != null)
-                        throw ex;
+                        throw new BadConfigException(ex.Message);
                     Console.WriteLine(ex.Message);
                     Console.WriteLine("Введите данные заново.");
-                    minMaxWindows = null; timespanFromTo = null; intervalBetweenFromTo = TimeSpan.MinValue;
                     WaitForInput();
+                    goto MinsMaxStart; // считываем значения снова, заместо выставления переменных в null как ниже
+                    //minMaxWindows = null; timespanFromTo = null; intervalBetweenFromTo = TimeSpan.MinValue;
                 }
 
             }
@@ -585,6 +589,7 @@ namespace ItemOrderDemonstration.Classes
             DateTime? returnDateFromConfig = Program.CurrentConfig?.OrderDate;
             if (returnDateFromConfig != null)
                 return returnDateFromConfig.Value;
+
             DateTime returnDate;
             Console.WriteLine("Дата заказов");
             StringBuilder dateFormat =
@@ -758,14 +763,16 @@ namespace ItemOrderDemonstration.Classes
         {
             TimeSpan result;
             Console.WriteLine("Введите время в формате чч:мм");
-            string time;
+            string timeString;
             do
             {
                 Console.Write(">");
-                time = Console.ReadLine();
-                if (time == "24:00")
-                    time = "01:00:00:00";
-            } while (!TimeSpan.TryParse(time, out result) || result < TimeSpan.Zero);
+                timeString = Console.ReadLine();
+                if (timeString == "24:00")
+                    timeString = "01:00:00:00";
+            } while (!timeString.Contains(":") 
+            || !TimeSpan.TryParse(timeString, out result) 
+            || result < TimeSpan.Zero);
             //result = new TimeSpan(result.Hours, result.Minutes, 0);
             return result;
         }
