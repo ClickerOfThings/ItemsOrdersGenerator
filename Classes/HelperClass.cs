@@ -38,10 +38,10 @@ namespace ItemOrderDemonstration.Classes
             }
             return result;
         }
-        public static List<OsmClass> GetAllPoints(OsmClass cityObj, string[] placeTypes)
+        /*public static List<OsmClass> GetAllPoints(OsmClass cityObj, string[] placeTypes)
         {
-            return OverpassMethods.GetAllPlacesInCity(cityObj, placeTypes);
-        }
+            return OverpassMethods.GetAllPlacesInBox(cityObj, placeTypes);
+        }*/
         public static bool TryParseDateTimeFromSystemCulture(string parseString, out DateTime result)
         {
             return DateTime.TryParse(parseString,

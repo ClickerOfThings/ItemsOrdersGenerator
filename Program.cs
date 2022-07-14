@@ -154,7 +154,8 @@ namespace ItemOrderDemonstration
             List<OsmClass> pointsList = new List<OsmClass>();
             try
             {
-                pointsList = HelperClass.GetAllPoints(searchObj, types);
+                //pointsList = HelperClass.GetAllPoints(searchObj, types);
+                pointsList = OverpassMethods.GetAllPlacesInBox(searchObj.CityNorthEast, searchObj.CitySouthWest, types);
                 Console.WriteLine("Найдено " + pointsList.Count + " точек");
                 ConsoleInput.WaitForInput();
             }
