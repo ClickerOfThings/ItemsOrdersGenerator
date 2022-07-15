@@ -21,16 +21,12 @@ namespace ItemOrderDemonstration
 {
     internal class Program
     {
-        const string DEFAULT_ITEMS_FILE = "items.xml";
-        const string DEFAULT_ORDERS_FILE = "orders.xml";
-
         public const string TIME_FORMAT = @"hh\:mm";
         public static Config CurrentConfig { get; set; }
         static void Main(string[] args)
         {
             // для разделителей decimal и float чисел в едином формате
             Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-            //Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator = ".";
 
             CurrentConfig = ConsoleInput.GetConfigFile();
             if (CurrentConfig is null)
@@ -39,6 +35,7 @@ namespace ItemOrderDemonstration
                     "данные будут вводиться вручную.");
                 ConsoleInput.WaitForInput();
             }
+
             string input;
             do
             {
@@ -54,14 +51,14 @@ namespace ItemOrderDemonstration
                     switch (input)
                     {
                         case "1":
-                            GenerateItemsFile();
+                            CreateItemsFile();
                             break;
                         case "2":
-                            GenerateOrdersFile();
+                            CreateOrdersFile();
                             break;
                         case "3":
-                            GenerateItemsFile();
-                            GenerateOrdersFile();
+                            CreateItemsFile();
+                            CreateOrdersFile();
                             break;
                         case "C":
                             Config newConf;
@@ -112,29 +109,14 @@ namespace ItemOrderDemonstration
 
             return;
         }
-        static void GenerateItemsFile()
+
+        private static void CreateItemsFile()
         {
-            string resultPath = CurrentConfig?.TxtItemFilePathInput;
-            if (string.IsNullOrEmpty(resultPath))
-                resultPath = ConsoleInput.GetItemTxtPathFromUser();
-            if (!File.Exists(resultPath))
-            {
-                Console.WriteLine("Указанный файл не найден.");
-                ConsoleInput.WaitForInput();
-                return;
-            }
-            string fileName = CurrentConfig?.XmlItemFilePathOutput;
-            if (string.IsNullOrEmpty(fileName))
-            {
-                Console.Write($"Введите название выходного файла (Enter для стандартного имени {DEFAULT_ITEMS_FILE}): ");
-                fileName = Console.ReadLine();
-                if (fileName == string.Empty)
-                    fileName = DEFAULT_ITEMS_FILE;
-            }
+            ConsoleInput.GetItemFilesPathsFromUser(out string inputItemsFilePath, out string outputFilePath);
             try
             {
                 Console.WriteLine("Файл создаётся, подождите...");
-                XmlGenerator.SerializeItemsListToFile(fileName, ModelGenerator.ParseTxtItemsIntoList(resultPath));
+                XmlGenerator.SerializeItemsListToFile(outputFilePath, ModelGenerator.ParseTxtItemsIntoList(inputItemsFilePath));
                 Console.WriteLine("Файл был успешно создан.");
             }
             catch (Exception ex)
@@ -143,7 +125,8 @@ namespace ItemOrderDemonstration
             }
             ConsoleInput.WaitForInput();
         }
-        private static void GenerateOrdersFile()
+
+        private static void CreateOrdersFile()
         {
             OsmClass searchObj = ConsoleInput.GetOsmObjectFromUser();
             if (searchObj is null)
@@ -186,14 +169,7 @@ namespace ItemOrderDemonstration
                 out TimeSpan intervalBetweenFromTo);
             Console.Clear();
 
-            string fileName = CurrentConfig?.OrdersFilePathOutput;
-            if (string.IsNullOrEmpty(fileName))
-            {
-                Console.WriteLine($"Введите название выходного файла (Enter для стандартного имени {DEFAULT_ORDERS_FILE}):");
-                fileName = Console.ReadLine();
-                if (fileName == string.Empty)
-                    fileName = DEFAULT_ORDERS_FILE;
-            }
+            ConsoleInput.GetOrderFilesPathsFromUser(out string fileName);
 
             try
             {

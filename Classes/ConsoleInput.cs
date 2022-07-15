@@ -13,6 +13,8 @@ namespace ItemOrderDemonstration.Classes
 {
     internal static class ConsoleInput
     {
+        private const string DEFAULT_ITEMS_OUTPUT_FILE = "items.xml";
+        private const string DEFAULT_ORDERS_OUTPUT_FILE = "orders.xml";
         public static Config GetConfigFile()
         {
             Config resultConfig = null;
@@ -203,6 +205,28 @@ namespace ItemOrderDemonstration.Classes
             return resultPath;
         }
 
+        public static void GetItemFilesPathsFromUser(out string inputItemsFilePath, out string outputFilePath)
+        {
+            inputItemsFilePath = Program.CurrentConfig?.TxtItemFilePathInput;
+            outputFilePath = Program.CurrentConfig?.XmlItemFilePathOutput;
+
+            if (string.IsNullOrEmpty(inputItemsFilePath))
+                inputItemsFilePath = GetItemTxtPathFromUser();
+            if (!File.Exists(inputItemsFilePath))
+            {
+                Console.WriteLine("Указанный файл не найден.");
+                WaitForInput();
+                return;
+            }
+            if (string.IsNullOrEmpty(outputFilePath))
+            {
+                Console.Write($"Введите название выходного файла (Enter для стандартного имени {DEFAULT_ITEMS_OUTPUT_FILE}): ");
+                outputFilePath = Console.ReadLine();
+                if (outputFilePath == string.Empty)
+                    outputFilePath = DEFAULT_ITEMS_OUTPUT_FILE;
+            }
+        }
+
         public static OsmClass GetOsmObjectFromUser()
         {
             bool exitFunction = false;
@@ -211,17 +235,11 @@ namespace ItemOrderDemonstration.Classes
 
             string cityNameFromConf = Program.CurrentConfig?.CityName;
             if (!string.IsNullOrEmpty(cityNameFromConf))
-                try
-                {
-                    searchObj = SearchCity(cityNameFromConf);
-                    if (searchObj is null)
-                        throw new BadConfigException("Город из конфигурации " + cityNameFromConf + " не был найден");
-                }
-                catch (Exception ex)
-                {
-                    throw new BadConfigException(ex.Message); // костыль по конвертированию любого исключения
-                                                              // в исключение конфига
-                }
+            {
+                searchObj = GetOneCityFromList(OverpassMethods.GetCityInfo(cityNameFromConf));
+                if (searchObj is null)
+                    throw new BadConfigException($"Город {cityNameFromConf} из конфигурации не был найден");
+            }    
             SearchRectangle rect = Program.CurrentConfig?.SearchRectangle;
             if (searchObj is null && rect != null)
                 if (ComparePoints(rect.NorthEastCorner, rect.SouthWestCorner) == 1)
@@ -236,7 +254,7 @@ namespace ItemOrderDemonstration.Classes
             while (!exitFunction && searchObj is null)
             {
                 Console.Clear();
-                Console.WriteLine("Создание заказов");
+                Console.WriteLine("Выборка данных");
                 Console.WriteLine("Укажите место выборки данных:\n" +
                     "[1] - по названию города,\n" +
                     "[2] - по прямоугольнику (координаты).");
@@ -247,7 +265,7 @@ namespace ItemOrderDemonstration.Classes
                     case "1":
                         Console.Write("Укажите название города: ");
                         string cityName = Console.ReadLine();
-                        searchObj = SearchCity(cityName);
+                        searchObj = GetOneCityFromList(OverpassMethods.GetCityInfo(cityName));
                         if (searchObj is null)
                         {
                             Console.WriteLine("Города не существует");
@@ -286,6 +304,11 @@ namespace ItemOrderDemonstration.Classes
         }
         public static OsmClass GetOneCityFromList(List<OsmClass> listToGetFrom)
         {
+            if (listToGetFrom is null || listToGetFrom.Count == 0)
+                return null;
+            if (listToGetFrom.Count == 1)
+                return listToGetFrom.First();
+            Console.WriteLine("Выберите один город из нескольких приведённых:");
             StringBuilder allowedInputBuilder = new StringBuilder();
             Dictionary<string, OsmClass> charToCity = new Dictionary<string, OsmClass>();
             int indexToCity = 1;
@@ -297,20 +320,6 @@ namespace ItemOrderDemonstration.Classes
                 indexToCity++;
             }
             return charToCity[GetInputFromConsole(allowedInputBuilder.ToString())];
-        }
-        private static OsmClass SearchCity(string cityName)
-        {
-            OsmClass returnObj;
-            Console.WriteLine("Ищем город, подождите...");
-            List<OsmClass> objs = OverpassMethods.GetCityInfo(cityName);
-            if (objs is null)
-                return null;
-            returnObj = objs[0];
-            if (objs.Count > 1)
-            {
-                returnObj = GetOneCityFromList(objs);
-            }
-            return returnObj;
         }
         public static string[] GetPlaceTypesFromUser()
         {
@@ -606,6 +615,18 @@ namespace ItemOrderDemonstration.Classes
             } while (!ParseHelper.TryParseDateTimeFromSystemCulture(Console.ReadLine(), out returnDate) ||
                     returnDate.TimeOfDay != TimeSpan.Zero);
             return returnDate;
+        }
+
+        public static void GetOrderFilesPathsFromUser(out string outputOrdersFile)
+        {
+            outputOrdersFile = Program.CurrentConfig?.OrdersFilePathOutput;
+            if (string.IsNullOrEmpty(outputOrdersFile))
+            {
+                Console.WriteLine($"Введите название выходного файла (Enter для стандартного имени {DEFAULT_ORDERS_OUTPUT_FILE}):");
+                outputOrdersFile = Console.ReadLine();
+                if (outputOrdersFile == string.Empty)
+                    outputOrdersFile = DEFAULT_ORDERS_OUTPUT_FILE;
+            }
         }
 
 
