@@ -1,4 +1,8 @@
-﻿using OverpassLibrary;
+﻿using ItemsOrdersGenerator.Classes.Helpers;
+using ItemsOrdersGenerator.Classes.Model;
+using ItemsOrdersGenerator.Classes.View;
+using ItemsOrdersGenerator.Classes.Extensions;
+using OverpassLibrary;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,7 +16,7 @@ namespace ItemOrderDemonstration.Classes
 {
     internal static class XmlGenerator
     {
-        public static void SerializeItemsListToFile(string fileName, List<Classes.Item> itemsToSerialize)
+        public static void SerializeItemsListToFile(string fileName, List<Item> itemsToSerialize)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Item>), new XmlRootAttribute("skus"));
             using FileStream writer = File.Create(fileName);
@@ -29,16 +33,14 @@ namespace ItemOrderDemonstration.Classes
             return deserialised as List<Item>;
         }
 
-        private const int TIME_WINDOW_COUNT_MIN = 1;
-        private const int TIME_WINDOW_COUNT_MAX = 4;
         public static void GenerateOrdersFile(List<Item> items, List<OsmClass> listOfPoints,
             DateTime ordersDateTime, string ordersFileName, int pointsCount,
             Tuple<int, int> minMaxTimeWindows,
             Tuple<int, int> minMaxItemsPerWindow, Tuple<int, int> minMaxItemCountPerPosition,
             Tuple<TimeSpan, TimeSpan> timespanFromTo, TimeSpan intervalBetweenFromTo)
         {
-            HelperClass.ShuffleList(ref items);
-            HelperClass.ShuffleList(ref listOfPoints);
+            items.ShuffleList();
+            listOfPoints.ShuffleList();
 
             XmlSerializer serializer = new XmlSerializer(typeof(OrdersListView));
             using FileStream writer = File.Create(ordersFileName);
@@ -55,7 +57,6 @@ namespace ItemOrderDemonstration.Classes
                     RetailPoint = new RetailPoint
                     {
                         Address = listOfPoints[i].FullAddressString.ToUpper(),
-                        //Id = listOfPoints[i].Id,
                         Id = Guid.NewGuid(),
                         Name = listOfPoints[i].Name.ToUpper(),
                         Location = new Location
@@ -64,36 +65,24 @@ namespace ItemOrderDemonstration.Classes
                             Latitude = listOfPoints[i].Latitude
                         }
                     }
-                    /*RetailPoint = new RetailPoint
-                    {
-                        Address = "TEST TEST TEST",
-                        Id = 0,
-                        Name = "TEST TEST TEST",
-                        Location = new Location
-                        {
-                            Longitude = 0,
-                            Latitude = 0
-                        }
-                    }*/
                 };
                 newOrder.Demands = new List<Demand>();
-                //int demandWindowsCount = HelperClass.rand.Next(TIME_WINDOW_COUNT_MIN, TIME_WINDOW_COUNT_MAX + 1);
-                int demandWindowsCount = HelperClass.rand.Next(minMaxTimeWindows.Item1, minMaxTimeWindows.Item2 + 1);
-                int itemsPerWindowCount = HelperClass.rand.Next(minMaxItemsPerWindow.Item1, minMaxItemsPerWindow.Item2 + 1);
+                int demandWindowsCount = GeneralHelper.rand.Next(minMaxTimeWindows.Item1, minMaxTimeWindows.Item2 + 1);
+                int itemsPerWindowCount = GeneralHelper.rand.Next(minMaxItemsPerWindow.Item1, minMaxItemsPerWindow.Item2 + 1);
                 IEnumerable<Tuple<TimeSpan, TimeSpan>> timespansEnumerable =
-                    Demand.RandomTimespans(HelperClass.rand, timespanFromTo.Item1, timespanFromTo.Item2,
+                    Demand.RandomTimespans(GeneralHelper.rand, timespanFromTo.Item1, timespanFromTo.Item2,
                     intervalBetweenFromTo, demandWindowsCount);
                 foreach (Tuple<TimeSpan, TimeSpan> tupleFromTo in
                     timespansEnumerable)
                 {
-                    HelperClass.ShuffleList(ref items);
+                    items.ShuffleList();
                     for (int k = 0; k < itemsPerWindowCount; k++)
                     {
                         Demand newDemand = new Demand
                         {
                             Position = new Position
                             {
-                                Amount = HelperClass.rand.Next(minMaxItemCountPerPosition.Item1, minMaxItemCountPerPosition.Item2 + 1),
+                                Amount = GeneralHelper.rand.Next(minMaxItemCountPerPosition.Item1, minMaxItemCountPerPosition.Item2 + 1),
                                 ItemId = items[k].Id,
                             },
                             From = tupleFromTo.Item1,

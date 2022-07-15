@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace ItemOrderDemonstration.Classes
+namespace ItemsOrdersGenerator.Classes.Model
 {
     [XmlType("retailPoint")]
     public class RetailPoint

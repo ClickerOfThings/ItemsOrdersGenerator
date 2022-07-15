@@ -1,9 +1,10 @@
-﻿using System;
+﻿using ItemsOrdersGenerator.Classes.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace ItemOrderDemonstration.Classes
+namespace ItemsOrdersGenerator.Classes.View
 {
     [XmlType("orders")]
     public class OrdersListView
@@ -17,7 +18,7 @@ namespace ItemOrderDemonstration.Classes
             }
             set
             {
-                DateOfOrders = HelperClass.ParseDateTimeFromSystemCulture(value);
+                DateOfOrders = Helpers.ParseHelper.ParseDateTimeFromSystemCulture(value);
             }
         }
         [XmlIgnore]

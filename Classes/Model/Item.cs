@@ -5,7 +5,7 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace ItemOrderDemonstration.Classes
+namespace ItemsOrdersGenerator.Classes.Model
 {
     [XmlType(TypeName = "sku")]
     public class Item

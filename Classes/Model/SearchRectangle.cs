@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using ItemOrderDemonstration.Classes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
-namespace ItemOrderDemonstration.Classes
+namespace ItemsOrdersGenerator.Classes.Model
 {
     internal class SearchRectangle
     {

@@ -1,13 +1,13 @@
-﻿using System;
+﻿using ItemOrderDemonstration;
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
-
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace ItemOrderDemonstration.Classes
+namespace ItemsOrdersGenerator.Classes.Model
 {
     [XmlType("demand")]
     public class Demand
@@ -51,9 +51,9 @@ namespace ItemOrderDemonstration.Classes
                 return tsToProcess.Hours.ToString();
             else
             {
-                StringBuilder builder = new StringBuilder(String.Format("{0:00}", tsToProcess.Hours));
+                StringBuilder builder = new StringBuilder(string.Format("{0:00}", tsToProcess.Hours));
                 builder.Append(":");
-                builder.Append(String.Format("{0:00}", tsToProcess.Minutes));
+                builder.Append(string.Format("{0:00}", tsToProcess.Minutes));
                 return builder.ToString();
             }
         }
@@ -69,7 +69,7 @@ namespace ItemOrderDemonstration.Classes
             TimeSpan intervalBetweenFromTo,
             int timeWindowsCount)
         {
-            if (!(CheckIfIntervalMeetsRange(minimumTime, maximumTime, intervalBetweenFromTo, timeWindowsCount)))
+            if (!CheckIfIntervalMeetsRange(minimumTime, maximumTime, intervalBetweenFromTo, timeWindowsCount))
                 throw new BadIntervalException(minimumTime, maximumTime, intervalBetweenFromTo, timeWindowsCount);
 
             TimeSpan from, to;
@@ -117,7 +117,7 @@ namespace ItemOrderDemonstration.Classes
 
     public class BadIntervalException : Exception
     {
-        private const string BAD_INTERVAL_MSG = 
+        private const string BAD_INTERVAL_MSG =
                     "Слишком большой промежуток, либо слишком большое количество временных окон. " +
                     "Максимально возможный промежуток между минимумом и максимумом - %0" +
                     ", текущий промежуток - %1";

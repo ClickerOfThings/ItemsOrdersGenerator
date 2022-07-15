@@ -1,4 +1,7 @@
-﻿using OverpassLibrary;
+﻿using ItemsOrdersGenerator.Classes.Helpers;
+using ItemsOrdersGenerator.Classes.Model;
+using ItemsOrdersGenerator.Classes.View;
+using OverpassLibrary;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,7 +17,7 @@ namespace ItemOrderDemonstration.Classes
         {
             Config resultConfig = null;
             bool exitFunction = false;
-            string[] jsonFiles = Classes.HelperClass.GetAllConfigFilesInAppFolder();
+            string[] jsonFiles = FolderHelper.GetAllConfigFilesInAppFolder();
             string resultPath = string.Empty;
             Dictionary<string, string> charToJson = new Dictionary<string, string>();
             string input;
@@ -64,11 +67,11 @@ namespace ItemOrderDemonstration.Classes
                         }
                         break;
                     case "?":
-                        Config.ConfigHelp();
+                        Config.ListConfigHelp();
                         WaitForInput();
                         break;
                     case "S":
-                        jsonFiles = HelperClass.GetAllConfigFilesInAppFolder();
+                        jsonFiles = FolderHelper.GetAllConfigFilesInAppFolder();
                         break;
                     case "E":
                         Config @new = new Config()
@@ -103,7 +106,7 @@ namespace ItemOrderDemonstration.Classes
                             Console.WriteLine("Файл не был найден");
                             WaitForInput();
                         }
-                        jsonFiles = HelperClass.GetAllConfigFilesInAppFolder();
+                        jsonFiles = FolderHelper.GetAllConfigFilesInAppFolder();
                         break;
                 }
                 if (!string.IsNullOrEmpty(resultPath))
@@ -128,7 +131,7 @@ namespace ItemOrderDemonstration.Classes
         public static string GetItemTxtPathFromUser()
         {
             bool exitFunction = false;
-            string[] txtFiles = Classes.HelperClass.GetAllTxtsInAppFolder();
+            string[] txtFiles = FolderHelper.GetAllTxtsInAppFolder();
             string resultPath = string.Empty;
             Dictionary<string, string> charToTxt = new Dictionary<string, string>();
             string input;
@@ -186,14 +189,14 @@ namespace ItemOrderDemonstration.Classes
                         WaitForInput();
                         break;
                     case "S":
-                        txtFiles = HelperClass.GetAllTxtsInAppFolder();
+                        txtFiles = FolderHelper.GetAllTxtsInAppFolder();
                         break;
                     case "Q":
                         exitFunction = true;
                         break;
                     default:
                         charToTxt.TryGetValue(input, out resultPath);
-                        txtFiles = HelperClass.GetAllTxtsInAppFolder();
+                        txtFiles = FolderHelper.GetAllTxtsInAppFolder();
                         break;
                 }
             }
@@ -382,7 +385,7 @@ namespace ItemOrderDemonstration.Classes
             bool exitFunction = false;
             List<Item> resultList = null;
             string input;
-            Dictionary<string, List<Item>> correctXmlFiles = HelperClass.GetAllCorrectXmlItemFilesInAppFolder();
+            Dictionary<string, List<Item>> correctXmlFiles = FolderHelper.GetCorrectXmlItemFilesInAppFolder();
             Dictionary<string, string> charToXml = new Dictionary<string, string>();
 
             string filePathFromConfig = Program.CurrentConfig?.ItemsFilePathInput;
@@ -455,7 +458,7 @@ namespace ItemOrderDemonstration.Classes
                         }
                         break;
                     case "S":
-                        correctXmlFiles = HelperClass.GetAllCorrectXmlItemFilesInAppFolder();
+                        correctXmlFiles = FolderHelper.GetCorrectXmlItemFilesInAppFolder();
                         break;
                     case "Q":
                         exitFunction = true;
@@ -600,7 +603,7 @@ namespace ItemOrderDemonstration.Classes
             do
             {
                 Console.Write(">");
-            } while (!HelperClass.TryParseDateTimeFromSystemCulture(Console.ReadLine(), out returnDate) ||
+            } while (!ParseHelper.TryParseDateTimeFromSystemCulture(Console.ReadLine(), out returnDate) ||
                     returnDate.TimeOfDay != TimeSpan.Zero);
             return returnDate;
         }

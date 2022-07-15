@@ -1,11 +1,12 @@
-﻿using System;
+﻿using ItemsOrdersGenerator.Classes.Model;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace ItemOrderDemonstration.Classes
 {
-    internal static class DataGenerator
+    internal static class ModelGenerator
     {
         /// <summary>
         /// Парсинг txt файла для извлечения данных о товаре
@@ -31,7 +32,7 @@ namespace ItemOrderDemonstration.Classes
                 {
                     if (attrs.Length != 3)
                         throw new ArgumentException();
-                    Item newItem = strings_to_sku(attrs);
+                    Item newItem = StringsToSku(attrs);
                     resultList.Add(newItem);
                 }
                 catch(Exception ex)
@@ -59,7 +60,7 @@ namespace ItemOrderDemonstration.Classes
         /// </summary>
         /// <param name="inputStrings">Строки для обработки, см remarks метода ParseTxtFileIntoList</param>
         /// <returns>Обработанный объект товара</returns>
-        private static Item strings_to_sku(string[] inputStrings)
+        private static Item StringsToSku(string[] inputStrings)
         {
             inputStrings[2] = inputStrings[2].Replace(",", ".");
             Item return_item = new Item()

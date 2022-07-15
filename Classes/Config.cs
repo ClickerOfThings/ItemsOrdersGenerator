@@ -9,6 +9,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using System.Reflection;
+using ItemsOrdersGenerator.Classes.Model;
+using ItemsOrdersGenerator.Classes.Helpers;
+using ItemsOrdersGenerator.Classes.View;
 
 namespace ItemOrderDemonstration.Classes
 {
@@ -94,7 +97,7 @@ namespace ItemOrderDemonstration.Classes
                 if (string.IsNullOrEmpty(value))
                     OrderDate = null;
                 else
-                    OrderDate = HelperClass.ParseDateTimeFromSystemCulture(value).Date;
+                    OrderDate = ParseHelper.ParseDateTimeFromSystemCulture(value).Date;
             }
         }
         //private int _pointsCount;

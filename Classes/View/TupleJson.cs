@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ItemOrderDemonstration.Classes
+namespace ItemsOrdersGenerator.Classes.View
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     internal class MinMaxTupleJson<T1, T2> : Tuple<T1, T2>

@@ -15,6 +15,7 @@ using OverpassLibrary;
 
 using System.Linq;
 using Newtonsoft.Json;
+using ItemsOrdersGenerator.Classes.Model;
 
 namespace ItemOrderDemonstration
 {
@@ -133,7 +134,7 @@ namespace ItemOrderDemonstration
             try
             {
                 Console.WriteLine("Файл создаётся, подождите...");
-                XmlGenerator.SerializeItemsListToFile(fileName, DataGenerator.ParseTxtItemsIntoList(resultPath));
+                XmlGenerator.SerializeItemsListToFile(fileName, ModelGenerator.ParseTxtItemsIntoList(resultPath));
                 Console.WriteLine("Файл был успешно создан.");
             }
             catch (Exception ex)
@@ -203,7 +204,7 @@ namespace ItemOrderDemonstration
                     fromTo, intervalBetweenFromTo);
                 Console.WriteLine("Файл " + fileName + " был успешно создан");
             }
-            catch (Classes.BadIntervalException ex)
+            catch (BadIntervalException ex)
             {
                 var prevColour = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;

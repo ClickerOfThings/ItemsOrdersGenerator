@@ -8,7 +8,7 @@ namespace ItemOrderDemonstration.Classes
 {
     internal partial class Config
     {
-        public static void ConfigHelp()
+        public static void ListConfigHelp()
         {
             Console.Clear();
             Console.WriteLine("Справка по полям конфигурационного файла:");
@@ -40,9 +40,6 @@ namespace ItemOrderDemonstration.Classes
                 Console.WriteLine();
             }
             Console.ForegroundColor = standardColour;
-
-            //throw new NotImplementedException();
-            return;
         }
     }
 }
