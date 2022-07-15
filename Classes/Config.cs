@@ -15,6 +15,9 @@ using ItemsOrdersGenerator.Classes.View;
 
 namespace ItemOrderDemonstration.Classes
 {
+    /// <summary>
+    /// Класс конфигурации
+    /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     internal partial class Config
     {

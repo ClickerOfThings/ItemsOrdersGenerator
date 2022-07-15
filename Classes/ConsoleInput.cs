@@ -19,7 +19,7 @@ namespace ItemOrderDemonstration.Classes
         {
             Config resultConfig = null;
             bool exitFunction = false;
-            string[] jsonFiles = FolderHelper.GetAllConfigFilesInAppFolder();
+            string[] jsonFiles = FolderHelper.GetConfigFilesInAppFolder();
             string resultPath = string.Empty;
             Dictionary<string, string> charToJson = new Dictionary<string, string>();
             string input;
@@ -73,7 +73,7 @@ namespace ItemOrderDemonstration.Classes
                         WaitForInput();
                         break;
                     case "S":
-                        jsonFiles = FolderHelper.GetAllConfigFilesInAppFolder();
+                        jsonFiles = FolderHelper.GetConfigFilesInAppFolder();
                         break;
                     case "E":
                         Config @new = new Config()
@@ -108,7 +108,7 @@ namespace ItemOrderDemonstration.Classes
                             Console.WriteLine("Файл не был найден");
                             WaitForInput();
                         }
-                        jsonFiles = FolderHelper.GetAllConfigFilesInAppFolder();
+                        jsonFiles = FolderHelper.GetConfigFilesInAppFolder();
                         break;
                 }
                 if (!string.IsNullOrEmpty(resultPath))
@@ -133,7 +133,7 @@ namespace ItemOrderDemonstration.Classes
         public static string GetItemTxtPathFromUser()
         {
             bool exitFunction = false;
-            string[] txtFiles = FolderHelper.GetAllTxtsInAppFolder();
+            string[] txtFiles = FolderHelper.GetTxtFilesInAppFolder();
             string resultPath = string.Empty;
             Dictionary<string, string> charToTxt = new Dictionary<string, string>();
             string input;
@@ -191,14 +191,14 @@ namespace ItemOrderDemonstration.Classes
                         WaitForInput();
                         break;
                     case "S":
-                        txtFiles = FolderHelper.GetAllTxtsInAppFolder();
+                        txtFiles = FolderHelper.GetTxtFilesInAppFolder();
                         break;
                     case "Q":
                         exitFunction = true;
                         break;
                     default:
                         charToTxt.TryGetValue(input, out resultPath);
-                        txtFiles = FolderHelper.GetAllTxtsInAppFolder();
+                        txtFiles = FolderHelper.GetTxtFilesInAppFolder();
                         break;
                 }
             }
@@ -394,7 +394,7 @@ namespace ItemOrderDemonstration.Classes
             bool exitFunction = false;
             List<Item> resultList = null;
             string input;
-            Dictionary<string, List<Item>> correctXmlFiles = FolderHelper.GetCorrectXmlItemFilesInAppFolder();
+            Dictionary<string, List<Item>> correctXmlFiles = FolderHelper.GetItemXmlFilesInAppFolder();
             Dictionary<string, string> charToXml = new Dictionary<string, string>();
 
             string filePathFromConfig = Program.CurrentConfig?.ItemsFilePathInput;
@@ -467,7 +467,7 @@ namespace ItemOrderDemonstration.Classes
                         }
                         break;
                     case "S":
-                        correctXmlFiles = FolderHelper.GetCorrectXmlItemFilesInAppFolder();
+                        correctXmlFiles = FolderHelper.GetItemXmlFilesInAppFolder();
                         break;
                     case "Q":
                         exitFunction = true;

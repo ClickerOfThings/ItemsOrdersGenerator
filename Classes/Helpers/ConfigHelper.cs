@@ -8,6 +8,9 @@ namespace ItemOrderDemonstration.Classes
 {
     internal partial class Config
     {
+        /// <summary>
+        /// Вывести помощь по переменным конфигурационного файла в консоль
+        /// </summary>
         public static void ListConfigHelp()
         {
             Console.Clear();

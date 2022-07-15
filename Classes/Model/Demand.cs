@@ -9,45 +9,81 @@ using System.Xml.Serialization;
 
 namespace ItemsOrdersGenerator.Classes.Model
 {
+    /// <summary>
+    /// Класс запроса в заказе
+    /// </summary>
     [XmlType("demand")]
     public class Demand
     {
+        /// <summary>
+        /// Начало время запроса (не сериализируется в xml файле)
+        /// </summary>
         [XmlIgnore]
         public TimeSpan From { get; set; }
+        /// <summary>
+        /// View-свойство начала времени запроса, который сериализируется 
+        /// в xml файл с форматированием из метода <see cref="FormatTimeSpanValues(TimeSpan)"/>
+        /// </summary>
         [XmlAttribute("from")]
         public string FromView
         {
             get
             {
-                return process_timespan(From);
+                return FormatTimeSpanValues(From);
             }
             set
             {
                 From = TimeSpan.Parse(value);
             }
         }
+        /// <summary>
+        /// Окончание время запроса (не сериализируется в xml файле)
+        /// </summary>
         [XmlIgnore]
         public TimeSpan To { get; set; }
+        /// <summary>
+        /// View-свойство конца времени запроса, который сериализируется 
+        /// в xml файл с форматированием из метода <see cref="FormatTimeSpanValues(TimeSpan)"/>
+        /// </summary>
         [XmlAttribute("to")]
         public string ToView
         {
             get
             {
-                return process_timespan(To);
+                return FormatTimeSpanValues(To);
             }
             set
             {
                 To = TimeSpan.Parse(value);
             }
         }
+        /// <summary>
+        /// Позиция товара
+        /// </summary>
         [XmlElement("position")]
         public Position Position { get; set; }
-
-        private string process_timespan(TimeSpan tsToProcess)
+        /// <summary>
+        /// Форматирование значений из TimeSpan для форматирования в xml файл заказов
+        /// </summary>
+        /// <param name="tsToProcess">Объект TimeSpan, который необходимо отформатировать</param>
+        /// <returns>Отформатированная строка из объекта TimeSpan</returns>
+        /// <remarks>
+        /// <para>
+        /// Форматирование времени: если <paramref name="tsToProcess"/> пустой, то пустая строка;
+        /// </para>
+        /// <para>
+        /// если <paramref name="tsToProcess"/> имеет только час, то час;
+        /// </para>
+        /// <para>
+        /// если <paramref name="tsToProcess"/> имеет и час и минуты, то в формате чч:мм (если час меньше десяти, то 
+        /// выводится одна цифра часа).
+        /// </para>
+        /// </remarks>
+        private string FormatTimeSpanValues(TimeSpan tsToProcess)
         {
             if (tsToProcess.Hours == 0 && tsToProcess.Minutes == 0)
                 return string.Empty;
-            if (tsToProcess.Minutes <= 0)
+            if (tsToProcess.Minutes == 0)
                 return tsToProcess.Hours.ToString();
             else
             {
@@ -57,12 +93,6 @@ namespace ItemsOrdersGenerator.Classes.Model
                 return builder.ToString();
             }
         }
-        /*public static void ThrowIntervalException(TimeSpan minTime, TimeSpan maxTime, int timeWins, TimeSpan interval) // wtf
-            => throw new BadIntervalException("Слишком большой промежуток, либо слишком большое количество временных окон. " +
-                    "Максимально возможный промежуток между минимумом и максимумом - " + 
-                    GetOnePartIntervalBetween(minTime, maxTime, timeWins).ToString(Program.TIME_FORMAT) + 
-                    ", текущий промежуток - " +
-                    interval.ToString(Program.TIME_FORMAT));*/
 
         public static IEnumerable<Tuple<TimeSpan, TimeSpan>> RandomTimespans(Random randObj,
             TimeSpan minimumTime, TimeSpan maximumTime,
@@ -74,13 +104,12 @@ namespace ItemsOrdersGenerator.Classes.Model
 
             TimeSpan from, to;
             TimeSpan interval = (maximumTime - minimumTime) / timeWindowsCount;
-            TimeSpan fragment = minimumTime;
             for (int i = 0; i < timeWindowsCount; i++)
             {
                 while (true)
                 {
-                    TimeSpan currentFragmentFrom = fragment + interval * i;
-                    TimeSpan currentFragmentTo = fragment + interval * (i + 1);
+                    TimeSpan currentFragmentFrom = minimumTime + interval * i;
+                    TimeSpan currentFragmentTo = minimumTime + interval * (i + 1);
                     from = RandomTimespan(randObj,
                         currentFragmentFrom.Ticks,
                         currentFragmentTo.Ticks);
