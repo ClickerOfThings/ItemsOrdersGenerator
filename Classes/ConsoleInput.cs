@@ -211,6 +211,8 @@ namespace ItemOrderDemonstration.Classes
                 try
                 {
                     searchObj = SearchCity(cityNameFromConf);
+                    if (searchObj is null)
+                        throw new BadConfigException("Город из конфигурации " + cityNameFromConf + " не был найден");
                 }
                 catch (Exception ex)
                 {
@@ -242,13 +244,10 @@ namespace ItemOrderDemonstration.Classes
                     case "1":
                         Console.Write("Укажите название города: ");
                         string cityName = Console.ReadLine();
-                        try
+                        searchObj = SearchCity(cityName);
+                        if (searchObj is null)
                         {
-                            searchObj = SearchCity(cityName);
-                        }
-                        catch (ArgumentException ex)
-                        {
-                            Console.WriteLine(ex.Message);
+                            Console.WriteLine("Города не существует");
                             WaitForInput();
                         }
                         break;
@@ -301,6 +300,8 @@ namespace ItemOrderDemonstration.Classes
             OsmClass returnObj;
             Console.WriteLine("Ищем город, подождите...");
             List<OsmClass> objs = OverpassMethods.GetCityInfo(cityName);
+            if (objs is null)
+                return null;
             returnObj = objs[0];
             if (objs.Count > 1)
             {
@@ -395,7 +396,7 @@ namespace ItemOrderDemonstration.Classes
                 {
                     resultList = XmlGenerator.DeserializeItemsFromFileToList(filePathFromConfig);
                 }
-                catch(System.InvalidOperationException ex)
+                catch (System.InvalidOperationException ex)
                 {
                     throw new BadConfigException(ex.InnerException.Message ?? ex.Message);
                 }
@@ -475,7 +476,7 @@ namespace ItemOrderDemonstration.Classes
             out Tuple<int, int> itemsPerWindow, out Tuple<int, int> itemsCountPerPosition,
             out Tuple<TimeSpan, TimeSpan> timespanFromTo, out TimeSpan intervalBetweenFromTo)
         {
-            MinsMaxStart:
+        MinsMaxStart:
             #region Config Values Set And Check);
             int? configPoints = Program.CurrentConfig?.PointsCount;
             if (configPoints != null)
@@ -770,8 +771,8 @@ namespace ItemOrderDemonstration.Classes
                 timeString = Console.ReadLine();
                 if (timeString == "24:00")
                     timeString = "01:00:00:00";
-            } while (!timeString.Contains(":") 
-            || !TimeSpan.TryParse(timeString, out result) 
+            } while (!timeString.Contains(":")
+            || !TimeSpan.TryParse(timeString, out result)
             || result < TimeSpan.Zero);
             //result = new TimeSpan(result.Hours, result.Minutes, 0);
             return result;

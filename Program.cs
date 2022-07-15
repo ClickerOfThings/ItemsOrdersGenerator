@@ -150,18 +150,21 @@ namespace ItemOrderDemonstration
             string[] types = ConsoleInput.GetPlaceTypesFromUser();
             if (types is null)
                 return;
-            Console.WriteLine("Ищем точки, подождите...");
+            Console.WriteLine("Ищем места, подождите...");
             List<OsmClass> pointsList = new List<OsmClass>();
             try
             {
-                //pointsList = HelperClass.GetAllPoints(searchObj, types);
                 pointsList = OverpassMethods.GetAllPlacesInBox(searchObj.CityNorthEast, searchObj.CitySouthWest, types);
-                Console.WriteLine("Найдено " + pointsList.Count + " точек");
+                if (pointsList is null)
+                {
+                    throw new Exception("Места не были найдены");
+                }
+                Console.WriteLine("Найдено " + pointsList.Count + " мест");
                 ConsoleInput.WaitForInput();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Во время поиска точек произошла ошибка: " + ex.Message);
+                Console.WriteLine("Во время поиска мест произошла ошибка: " + ex.Message);
                 ConsoleInput.WaitForInput();
                 return;
             }
