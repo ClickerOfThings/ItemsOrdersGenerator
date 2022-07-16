@@ -36,7 +36,7 @@ namespace ItemOrderDemonstration
                 ConsoleInput.WaitForInput();
             }
 
-            string input;
+            string consoleInput;
             do
             {
                 Console.Clear();
@@ -45,10 +45,10 @@ namespace ItemOrderDemonstration
                 Console.WriteLine("Сгенерировать: [1] - файл товаров, [2] - файл заказов, [3] - оба файла.");
                 Console.WriteLine("[C] для загрузки нового конфигурационного файла.");
                 Console.WriteLine("[Q] для выхода.");
-                input = ConsoleInput.GetInputFromConsole("1 2 3 C Q");
+                consoleInput = ConsoleInput.GetInputFromConsole("1 2 3 C Q");
                 try
                 {
-                    switch (input)
+                    switch (consoleInput)
                     {
                         case "1":
                             CreateItemsFile();
@@ -61,16 +61,16 @@ namespace ItemOrderDemonstration
                             CreateOrdersFile();
                             break;
                         case "C":
-                            Config newConf;
+                            Config newLoadedConfig;
                             try
                             {
-                                newConf = ConsoleInput.GetConfigFile();
+                                newLoadedConfig = ConsoleInput.GetConfigFile();
                             }
                             catch (Exception ex)
                             {
                                 throw new BadConfigException(ex.Message);
                             }
-                            if (newConf is null)
+                            if (newLoadedConfig is null)
                             {
                                 Console.WriteLine("Конфигурационный файл не был загружен. Вы хотите " +
                                     "работать без загруженной ранее конфигурации [Y], или оставить " +
@@ -87,7 +87,7 @@ namespace ItemOrderDemonstration
                                 ConsoleInput.WaitForInput();
                             }
                             else
-                                CurrentConfig = newConf;
+                                CurrentConfig = newLoadedConfig;
                             break;
                     }
                 }
@@ -105,7 +105,7 @@ namespace ItemOrderDemonstration
                     ConsoleInput.WaitForInput();
                 }
 #endif
-            } while (input != "Q");
+            } while (consoleInput != "Q");
 
             return;
         }
@@ -113,6 +113,7 @@ namespace ItemOrderDemonstration
         private static void CreateItemsFile()
         {
             ConsoleInput.GetItemFilesPathsFromUser(out string inputItemsFilePath, out string outputFilePath);
+
             try
             {
                 Console.WriteLine("Файл создаётся, подождите...");
@@ -123,27 +124,31 @@ namespace ItemOrderDemonstration
             {
                 Console.WriteLine("Во время создания файла товаров произошла ошибка: " + ex.ToString());
             }
+
             ConsoleInput.WaitForInput();
         }
 
         private static void CreateOrdersFile()
         {
-            OsmClass searchObj = ConsoleInput.GetOsmObjectFromUser();
-            if (searchObj is null)
+            OsmClass foundObj = ConsoleInput.GetOsmObjectFromUser();
+            if (foundObj is null)
                 return;
-            string[] types = ConsoleInput.GetPlaceTypesFromUser();
-            if (types is null)
+
+            string[] foundTypes = ConsoleInput.GetPlaceTypesFromUser();
+            if (foundTypes is null)
                 return;
+
             Console.WriteLine("Ищем места, подождите...");
-            List<OsmClass> pointsList = new List<OsmClass>();
+            List<OsmClass> foundPointsList = new List<OsmClass>();
             try
             {
-                pointsList = OverpassMethods.GetAllPlacesInBox(searchObj.CityNorthEast, searchObj.CitySouthWest, types);
-                if (pointsList.Count == 0)
+                foundPointsList = OverpassMethods.GetAllPlacesInBox(
+                    foundObj.CityNorthEast, foundObj.CitySouthWest, foundTypes);
+                if (foundPointsList.Count == 0)
                 {
                     throw new Exception("Места не были найдены");
                 }
-                Console.WriteLine("Найдено " + pointsList.Count + " мест");
+                Console.WriteLine("Найдено " + foundPointsList.Count + " мест");
                 ConsoleInput.WaitForInput();
             }
             catch (Exception ex)
@@ -152,47 +157,48 @@ namespace ItemOrderDemonstration
                 ConsoleInput.WaitForInput();
                 return;
             }
-            List<Item> itemsList = ConsoleInput.GetItemsFromUser();
-            if (itemsList is null)
+
+            List<Item> foundItemsList = ConsoleInput.GetItemsFromUser();
+            if (foundItemsList is null)
                 return;
             Console.Clear();
 
             DateTime ordersDateTime = ConsoleInput.GetDateFromUser();
             Console.Clear();
 
-            ConsoleInput.GetMinsAndMaxsFromUser(pointsList.Count, itemsList.Count,
+            ConsoleInput.GetMinsAndMaxsFromUser(foundPointsList.Count, foundItemsList.Count,
                 out int pointsCount,
-                out Tuple<int, int> windowsMinMax,
+                out Tuple<int, int> windows,
                 out Tuple<int, int> itemsPerWindow,
                 out Tuple<int, int> itemsCountPerPosition,
-                out Tuple<TimeSpan, TimeSpan> fromTo,
+                out Tuple<TimeSpan, TimeSpan> fromToRange,
                 out TimeSpan intervalBetweenFromTo);
             Console.Clear();
 
-            ConsoleInput.GetOrderFilesPathsFromUser(out string fileName);
+            ConsoleInput.GetOrderFilesPathsFromUser(out string outputOrdersFileName);
 
             try
             {
                 Console.WriteLine("Создаётся файл заказов, пожалуйста, подождите...");
-                XmlGenerator.GenerateOrdersFile(itemsList, pointsList,
-                    ordersDateTime, fileName, pointsCount,
-                    windowsMinMax, itemsPerWindow, itemsCountPerPosition,
-                    fromTo, intervalBetweenFromTo);
-                Console.WriteLine("Файл " + fileName + " был успешно создан");
+                XmlGenerator.GenerateOrdersFile(foundItemsList, foundPointsList,
+                    ordersDateTime, outputOrdersFileName, pointsCount,
+                    windows, itemsPerWindow, itemsCountPerPosition,
+                    fromToRange, intervalBetweenFromTo);
+                Console.WriteLine("Файл " + outputOrdersFileName + " был успешно создан");
             }
             catch (BadIntervalException ex)
             {
-                var prevColour = Console.ForegroundColor;
+                var previousConsoleColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("При создании файла возникла ошибка интервала: " + ex.Message);
-                Console.ForegroundColor = prevColour;
+                Console.ForegroundColor = previousConsoleColor;
             }
             catch (Exception ex)
             {
-                var prevColour = Console.ForegroundColor;
+                var previousConsoleColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("При создании файла возникла ошибка: " + ex.Message);
-                Console.ForegroundColor = prevColour;
+                Console.ForegroundColor = previousConsoleColor;
             }
             ConsoleInput.WaitForInput();
         }
