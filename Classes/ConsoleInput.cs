@@ -18,65 +18,63 @@ namespace ItemOrderDemonstration.Classes
         public static Config GetConfigFile()
         {
             Config resultConfig = null;
-            bool exitFunction = false;
-            string[] jsonFiles = FolderHelper.GetConfigFilesInAppFolder();
-            string resultPath = string.Empty;
-            Dictionary<string, string> charToJson = new Dictionary<string, string>();
-            string input;
-            while (!exitFunction)
+            bool isExitingFunction = false;
+            string[] configFilesInAppFolder = FolderHelper.GetConfigFilesInAppFolder();
+            string configPath = string.Empty;
+            Dictionary<string, string> charToConfigPath = new Dictionary<string, string>();
+            string consoleInput;
+            while (!isExitingFunction)
             {
                 Console.Clear();
-                Console.WriteLine("Загрузка конфигурационного файла");
-                StringBuilder allowedInputBuilder = new StringBuilder("? C S E Q");
-                if (jsonFiles.Length == 0)
-                {
+
+                StringBuilder allowedInput = new StringBuilder("? C S E Q");
+                charToConfigPath.Clear();
+                if (configFilesInAppFolder.Length == 0)
                     Console.WriteLine("В папке с приложением не найдено json/conf файлов.");
-                    charToJson.Clear();
-                }
                 else
                 {
                     Console.WriteLine("В папке с приложением найдены следующие json/conf файлы:");
-                    charToJson.Clear();
-                    int counter = 1;
-                    foreach (string jsonFile in jsonFiles)
+                    int configFileCounter = 1;
+                    foreach (string jsonFile in configFilesInAppFolder)
                     {
-                        charToJson.Add(counter.ToString(), jsonFile);
-                        allowedInputBuilder.Append(" " + counter.ToString());
-                        Console.WriteLine("[" + counter + "]: " + jsonFile);
-                        counter++;
+                        charToConfigPath.Add(configFileCounter.ToString(), jsonFile);
+                        allowedInput.Append(" " + configFileCounter.ToString());
+                        Console.WriteLine("[" + configFileCounter + "]: " + jsonFile);
+                        configFileCounter++;
                     }
                 }
-                Console.WriteLine(
-                        "[C] для ручного ввода пути к файлу,\n" +
+
+                Console.WriteLine("Загрузка конфигурационного файла\n" +
                         "[?] для помощи по полям конфигурации,\n" +
+                        "[C] для ручного ввода пути к файлу,\n" +
                         "[S] чтобы снова сканировать папку,\n" +
-                        "[E] чтобы создать пример конфигурационного файла (user.conf.example)");
-                Console.WriteLine("[Q] - не загружать новый конфигурационный файл.");
-                input = GetInputFromConsole(allowedInputBuilder.ToString());
-                switch (input)
+                        "[E] чтобы создать пример конфигурационного файла (user.conf.example)," +
+                        "[Q] - не загружать новый конфигурационный файл.");
+                consoleInput = GetInputFromConsole(allowedInput.ToString());
+                switch (consoleInput)
                 {
+                    case "?":
+                        Config.ListConfigHelp();
+                        WaitForInput();
+                        break;
                     case "C":
                         Console.WriteLine(
                         "Укажите относительный или полный путь к json/conf конфигурации\n" +
                         "(например, Папка/user.conf или C:/user.conf)");
-                        string customPath = Console.ReadLine();
-                        if (File.Exists(customPath))
-                            resultPath = customPath;
+                        string customFilePath = Console.ReadLine();
+                        if (File.Exists(customFilePath))
+                            configPath = customFilePath;
                         else
                         {
                             Console.WriteLine("Файл не найден.");
                             WaitForInput();
                         }
                         break;
-                    case "?":
-                        Config.ListConfigHelp();
-                        WaitForInput();
-                        break;
                     case "S":
-                        jsonFiles = FolderHelper.GetConfigFilesInAppFolder();
+                        configFilesInAppFolder = FolderHelper.GetConfigFilesInAppFolder();
                         break;
                     case "E":
-                        Config @new = new Config()
+                        Config exampleConfig = new Config()
                         {
                             CityName = "Москва",
                             SearchRectangle = new SearchRectangle(10, 20, 30, 40),
@@ -94,29 +92,29 @@ namespace ItemOrderDemonstration.Classes
                             TxtItemFilePathInput = "tovar.txt",
                             XmlItemFilePathOutput = "items.xml"
                         };
-                        @new.WriteIntoJson("user.conf.example");
+                        exampleConfig.WriteIntoJson("user.conf.example");
                         Console.WriteLine("Пример конфигурационного файла был записан в user.conf.example");
                         WaitForInput();
                         break;
                     case "Q":
-                        resultPath = null;
-                        exitFunction = true;
+                        configPath = null;
+                        isExitingFunction = true;
                         break;
                     default:
-                        if (!charToJson.TryGetValue(input, out resultPath))
+                        if (!charToConfigPath.TryGetValue(consoleInput, out configPath))
                         {
                             Console.WriteLine("Файл не был найден");
                             WaitForInput();
                         }
-                        jsonFiles = FolderHelper.GetConfigFilesInAppFolder();
+                        configFilesInAppFolder = FolderHelper.GetConfigFilesInAppFolder();
                         break;
                 }
-                if (!string.IsNullOrEmpty(resultPath))
+                if (!string.IsNullOrEmpty(configPath))
                 {
                     try
                     {
-                        resultConfig = Config.ReadFromFile(resultPath);
-                        exitFunction = true;
+                        resultConfig = Config.ReadFromFile(configPath);
+                        isExitingFunction = true;
                     }
                     catch (Exception ex)
                     {
@@ -132,55 +130,43 @@ namespace ItemOrderDemonstration.Classes
 
         public static string GetItemTxtPathFromUser()
         {
-            bool exitFunction = false;
+            bool isExitingFunction = false;
             string[] txtFiles = FolderHelper.GetTxtFilesInAppFolder();
-            string resultPath = string.Empty;
-            Dictionary<string, string> charToTxt = new Dictionary<string, string>();
-            string input;
-            while (!exitFunction && string.IsNullOrEmpty(resultPath))
+            string resultItemPath = string.Empty;
+            Dictionary<string, string> charToTxtFilePath = new Dictionary<string, string>();
+            string consoleInput;
+
+            while (!isExitingFunction && string.IsNullOrEmpty(resultItemPath))
             {
                 Console.Clear();
-                Console.WriteLine("Выбор типа продукции");
-                StringBuilder allowedInputBuilder = new StringBuilder("? C S Q");
+
+                StringBuilder allowedInput = new StringBuilder("? C S Q");
+                charToTxtFilePath.Clear();
+
                 if (txtFiles.Length == 0)
-                {
                     Console.WriteLine("В папке с приложением не найдено txt файлов.\n");
-                    charToTxt.Clear();
-                }
                 else
                 {
                     Console.WriteLine("В папке с приложением найдены следующие txt файлы:");
-                    charToTxt.Clear();
-                    int counter = 1;
+                    charToTxtFilePath.Clear();
+                    int txtFileCounter = 1;
                     foreach (string txtFile in txtFiles)
                     {
-                        charToTxt.Add(counter.ToString(), txtFile);
-                        allowedInputBuilder.Append(" " + counter.ToString());
-                        Console.WriteLine("[" + counter + "]: " + txtFile);
-                        counter++;
+                        charToTxtFilePath.Add(txtFileCounter.ToString(), txtFile);
+                        allowedInput.Append(" " + txtFileCounter.ToString());
+                        Console.WriteLine("[" + txtFileCounter + "]: " + txtFile);
+                        txtFileCounter++;
                     }
                 }
-                Console.WriteLine(
-                        "[C] для ручного ввода пути к файлу,\n" +
+
+                Console.WriteLine("Выбор типа продукции\n" +
                         "[?] для помощи по формату файла,\n" +
-                        "[S] чтобы снова сканировать папку.");
-                Console.WriteLine("[Q] - назад в меню.");
-                input = GetInputFromConsole(allowedInputBuilder.ToString());
-                switch (input)
+                        "[C] для ручного ввода пути к файлу,\n" +
+                        "[S] чтобы снова сканировать папку." +
+                        "[Q] - назад в меню.");
+                consoleInput = GetInputFromConsole(allowedInput.ToString());
+                switch (consoleInput)
                 {
-                    case "C":
-                        Console.WriteLine(
-                        "Укажите относительный или полный путь к txt файлу\n" +
-                        "(например, Папка/file.txt или C:/file.txt)");
-                        string customPath = Console.ReadLine();
-                        if (File.Exists(customPath))
-                            resultPath = customPath;
-                        else
-                        {
-                            Console.WriteLine("Файл не найден.");
-                            WaitForInput();
-                        }
-                        break;
                     case "?":
                         Console.WriteLine("\n");
                         Console.WriteLine("Формат txt файла для товаров:");
@@ -190,19 +176,32 @@ namespace ItemOrderDemonstration.Classes
                             "ввод десятичного числа, например 0.100)");
                         WaitForInput();
                         break;
+                    case "C":
+                        Console.WriteLine(
+                        "Укажите относительный или полный путь к txt файлу\n" +
+                        "(например, Папка/file.txt или C:/file.txt)");
+                        string customFilePath = Console.ReadLine();
+                        if (File.Exists(customFilePath))
+                            resultItemPath = customFilePath;
+                        else
+                        {
+                            Console.WriteLine("Файл не найден.");
+                            WaitForInput();
+                        }
+                        break;
                     case "S":
                         txtFiles = FolderHelper.GetTxtFilesInAppFolder();
                         break;
                     case "Q":
-                        exitFunction = true;
+                        isExitingFunction = true;
                         break;
                     default:
-                        charToTxt.TryGetValue(input, out resultPath);
+                        charToTxtFilePath.TryGetValue(consoleInput, out resultItemPath);
                         txtFiles = FolderHelper.GetTxtFilesInAppFolder();
                         break;
                 }
             }
-            return resultPath;
+            return resultItemPath;
         }
 
         public static void GetItemFilesPathsFromUser(out string inputItemsFilePath, out string outputFilePath)
@@ -229,64 +228,66 @@ namespace ItemOrderDemonstration.Classes
 
         public static OsmClass GetOsmObjectFromUser()
         {
-            bool exitFunction = false;
-            OsmClass searchObj = null;
-            string input;
+            bool isExitingFunction = false;
+            OsmClass foundCity = null;
+            string consoleInput;
 
             string cityNameFromConf = Program.CurrentConfig?.CityName;
             if (!string.IsNullOrEmpty(cityNameFromConf))
             {
-                searchObj = GetOneCityFromList(OverpassMethods.GetCityInfo(cityNameFromConf));
-                if (searchObj is null)
+                foundCity = GetOneCityFromList(OverpassMethods.GetCityInfo(cityNameFromConf));
+                if (foundCity is null)
                     throw new BadConfigException($"Город {cityNameFromConf} из конфигурации не был найден");
-            }    
-            SearchRectangle rect = Program.CurrentConfig?.SearchRectangle;
-            if (searchObj is null && rect != null)
-                if (ComparePoints(rect.NorthEastCorner, rect.SouthWestCorner) == 1)
+            }
+
+            SearchRectangle rectFromConfig = Program.CurrentConfig?.SearchRectangle;
+            if (foundCity is null && rectFromConfig != null)
+            {
+                if (ComparePoints(rectFromConfig.NorthEastCorner, rectFromConfig.SouthWestCorner) == 1)
                     throw new BadConfigException("В прямоугольнике северо-восточный угол больше юго-восточного");
                 else
-                    searchObj = new OsmClass
+                    foundCity = new OsmClass
                     {
-                        CityNorthEast = rect.NorthEastCorner,
-                        CitySouthWest = rect.SouthWestCorner
+                        CityNorthEast = rectFromConfig.NorthEastCorner,
+                        CitySouthWest = rectFromConfig.SouthWestCorner
                     };
+            }
 
-            while (!exitFunction && searchObj is null)
+            while (!isExitingFunction && foundCity is null)
             {
                 Console.Clear();
-                Console.WriteLine("Выборка данных");
                 Console.WriteLine("Укажите место выборки данных:\n" +
                     "[1] - по названию города,\n" +
-                    "[2] - по прямоугольнику (координаты).");
-                Console.WriteLine("[Q] - назад в меню.");
-                input = GetInputFromConsole("1 2 Q");
-                switch (input)
+                    "[2] - по прямоугольнику (координаты).\n" +
+                    "[Q] - назад в меню.");
+                consoleInput = GetInputFromConsole("1 2 Q");
+                switch (consoleInput)
                 {
                     case "1":
                         Console.Write("Укажите название города: ");
-                        string cityName = Console.ReadLine();
-                        searchObj = GetOneCityFromList(OverpassMethods.GetCityInfo(cityName));
-                        if (searchObj is null)
+                        string cityNameFromConsole = Console.ReadLine();
+                        foundCity = GetOneCityFromList(OverpassMethods.GetCityInfo(cityNameFromConsole));
+                        if (foundCity is null)
                         {
                             Console.WriteLine("Города не существует");
                             WaitForInput();
                         }
                         break;
                     case "2":
-                        PointF northEast, southWest;
+                        PointF northEastPoint, southWestPoint;
                         Console.Clear();
-                        Console.WriteLine("Введите координаты. Принимаются следующие форматы (без скобочек):\n");
-                        Console.WriteLine("(40.1234) - одна точка, последовательно принимаются все четыре точки координат;\n");
-                        Console.WriteLine("(40.1234, 40.4321) - точка северо-восточного угла, в последующем ожидается " +
-                                          "точка юго-западного угла;\n");
-                        Console.WriteLine("(40.1234, 40.4321, 45.1234, 45.4321) - точка северо-восточного и юго-западного угла.");
-                        if (GetCoordinatesFromConsole(out northEast, out southWest))
+                        Console.WriteLine("Введите координаты. Принимаются следующие форматы (без скобочек):\n" +
+                            "(40.1234) - одна точка, последовательно принимаются все четыре точки координат;\n" +
+                            "(40.1234, 40.4321) - точка северо-восточного угла, в последующем ожидается " +
+                            "точка юго-западного угла;\n" +
+                            "(40.1234, 40.4321, 45.1234, 45.4321) - точка северо-восточного и юго-западного угла.");
+                        if (GetCoordinatesFromConsole(out northEastPoint, out southWestPoint))
                         {
-                            exitFunction = true;
-                            searchObj = new OsmClass
+                            isExitingFunction = true;
+                            foundCity = new OsmClass
                             {
-                                CityNorthEast = northEast,
-                                CitySouthWest = southWest
+                                CityNorthEast = northEastPoint,
+                                CitySouthWest = southWestPoint
                             };
                         }
                         else
@@ -296,11 +297,11 @@ namespace ItemOrderDemonstration.Classes
                         }
                         break;
                     case "Q":
-                        exitFunction = true;
+                        isExitingFunction = true;
                         break;
                 }
             }
-            return searchObj;
+            return foundCity;
         }
         public static OsmClass GetOneCityFromList(List<OsmClass> listToGetFrom)
         {
@@ -308,47 +309,58 @@ namespace ItemOrderDemonstration.Classes
                 return null;
             if (listToGetFrom.Count == 1)
                 return listToGetFrom.First();
-            Console.WriteLine("Выберите один город из нескольких приведённых:");
-            StringBuilder allowedInputBuilder = new StringBuilder();
+
+            StringBuilder allowedInput = new StringBuilder();
             Dictionary<string, OsmClass> charToCity = new Dictionary<string, OsmClass>();
-            int indexToCity = 1;
+
+            int cityIndex = 1;
+            Console.WriteLine("Выберите один город из нескольких приведённых:");
             foreach (OsmClass city in listToGetFrom)
             {
-                allowedInputBuilder.Append(" " + indexToCity);
-                charToCity.Add(indexToCity.ToString(), city);
-                Console.WriteLine("[" + indexToCity + "] - " + city.State + ", " + city.City);
-                indexToCity++;
+                allowedInput.Append(" " + cityIndex);
+                charToCity.Add(cityIndex.ToString(), city);
+                Console.WriteLine("[" + cityIndex + "] - " + city.State + ", " + city.City);
+                cityIndex++;
             }
-            return charToCity[GetInputFromConsole(allowedInputBuilder.ToString())];
+
+            return charToCity[GetInputFromConsole(allowedInput.ToString())];
         }
         public static string[] GetPlaceTypesFromUser()
         {
-            bool exitFunction = false;
+            bool isExitingFunction = false;
             string[] resultTypes = null;
-            string input;
+            string consoleInput;
 
             string placeTypesFromConf = Program.CurrentConfig?.PlaceTypes;
             if (!string.IsNullOrEmpty(placeTypesFromConf))
                 resultTypes = placeTypesFromConf.Replace(", ", ",").Split(",");
 
-            while (!exitFunction && resultTypes is null)
+            while (!isExitingFunction && resultTypes is null)
             {
                 Console.Clear();
-                Console.WriteLine("Выбор типов мест");
-                Console.WriteLine("[1] - выбор стандартного набора (администрация и муниципалитет, " +
-                    "магазины, кафе и рестораны и проч.)");
-                Console.WriteLine("[2] - все типы мест (НЕ РЕКОМЕНДУЕТСЯ)\n");
-                Console.WriteLine("[C] - ввод файла с типами,");
-                Console.WriteLine("[?] - помощь по формату файла с типами,");
-                Console.WriteLine("[Q] - выйти в меню.");
-                input = GetInputFromConsole("1 2 C ? Q");
-                switch (input)
+                Console.WriteLine("Выбор типов мест\n" +
+                    "[1] - выбор стандартного набора (администрация и муниципалитет, " +
+                    "магазины, кафе и рестораны и проч.)" +
+                    "[2] - все типы мест (НЕ РЕКОМЕНДУЕТСЯ)\n\n" +
+                    "[?] - помощь по формату файла с типами.\n" +
+                    "[C] - ввод файла с типами,\n" +
+                    "[Q] - выйти в меню.");
+                consoleInput = GetInputFromConsole("1 2 ? C Q");
+                switch (consoleInput)
                 {
                     case "1":
                         resultTypes = OverpassConsts.MAIN_PLACES;
                         break;
                     case "2":
                         resultTypes = OverpassConsts.ALL_PLACES;
+                        break;
+                    case "?":
+                        Console.WriteLine("Формат файла с типами мест:");
+                        Console.WriteLine("Типы мест (на английском, из базы данных OSM) вводятся в одну линию, " +
+                            "каждый тип разделяется запятой (допускается пробел после запятой).\n" +
+                            "Например: sewing,curtain,electronics,jewelry\n" +
+                            "Будут выбраны пошивочные, магазины по продаже занавесок, электроники и ювелирных изделий.");
+                        WaitForInput();
                         break;
                     case "C":
                         Console.WriteLine("Укажите относительный или полный путь к файлу с типами\n" +
@@ -373,16 +385,8 @@ namespace ItemOrderDemonstration.Classes
                         if (GetInputFromConsole("Y N") == "N")
                             resultTypes = null;
                         break;
-                    case "?":
-                        Console.WriteLine("Формат файла с типами мест:");
-                        Console.WriteLine("Типы мест (на английском, из базы данных OSM) вводятся в одну линию, " +
-                            "каждый тип разделяется запятой (допускается пробел после запятой).\n" +
-                            "Например: sewing,curtain,electronics,jewelry\n" +
-                            "Будут выбраны пошивочные, магазины по продаже занавесок, электроники и ювелирных изделий.");
-                        WaitForInput();
-                        break;
                     case "Q":
-                        exitFunction = true;
+                        isExitingFunction = true;
                         break;
                 }
             }
@@ -391,22 +395,20 @@ namespace ItemOrderDemonstration.Classes
 
         public static List<Item> GetItemsFromUser()
         {
-            bool exitFunction = false;
-            List<Item> resultList = null;
-            string input;
-            Dictionary<string, List<Item>> correctXmlFiles = FolderHelper.GetItemXmlFilesInAppFolder();
-            Dictionary<string, string> charToXml = new Dictionary<string, string>();
+            bool isExitingFunction = false;
+            List<Item> resultItemsList = null;
+            string consoleInput;
+            Dictionary<string, List<Item>> formattedXmlFiles = FolderHelper.GetItemXmlFilesInAppFolder();
+            Dictionary<string, string> charToXmlFilePath = new Dictionary<string, string>();
 
             string filePathFromConfig = Program.CurrentConfig?.ItemsFilePathInput;
             if (!string.IsNullOrEmpty(filePathFromConfig))
             {
                 if (!File.Exists(filePathFromConfig))
-                {
                     throw new BadConfigException("Файла с товарами по пути " + filePathFromConfig + " не существует");
-                }
                 try
                 {
-                    resultList = XmlGenerator.DeserializeItemsFromFileToList(filePathFromConfig);
+                    resultItemsList = XmlGenerator.DeserializeItemsFromFileToList(filePathFromConfig);
                 }
                 catch (System.InvalidOperationException ex)
                 {
@@ -414,45 +416,47 @@ namespace ItemOrderDemonstration.Classes
                 }
             }
 
-            while (!exitFunction && resultList is null)
+            while (!isExitingFunction && resultItemsList is null)
             {
                 Console.Clear();
-                Console.WriteLine("Выбор товаров");
-                StringBuilder allowedInputBuilder = new StringBuilder("C S Q");
-                if (correctXmlFiles.Count == 0)
+
+                StringBuilder allowedInput = new StringBuilder("C S Q");
+                if (formattedXmlFiles.Count == 0)
                 {
                     Console.WriteLine("В папке с приложением не найдено xml файлов товаров с правильным форматом.\n");
-                    charToXml.Clear();
+                    charToXmlFilePath.Clear();
                 }
                 else
                 {
                     Console.WriteLine("В папке с приложением найдены следующие xml файлы:");
-                    charToXml.Clear();
-                    int counter = 1;
-                    foreach (string xmlFile in correctXmlFiles.Keys)
+                    charToXmlFilePath.Clear();
+                    int fileCounter = 1;
+                    foreach (string xmlFile in formattedXmlFiles.Keys)
                     {
-                        charToXml.Add(counter.ToString(), xmlFile);
-                        allowedInputBuilder.Append(" " + counter.ToString());
-                        Console.WriteLine("[" + counter + "]: " + xmlFile);
-                        counter++;
+                        charToXmlFilePath.Add(fileCounter.ToString(), xmlFile);
+                        allowedInput.Append(" " + fileCounter.ToString());
+                        Console.WriteLine("[" + fileCounter + "]: " + xmlFile);
+                        fileCounter++;
                     }
                 }
+
+                Console.WriteLine("Выбор товаров");
                 Console.WriteLine("[C] для ручного ввода пути к файлу,");
                 Console.WriteLine("[S] чтобы снова сканировать папку.");
                 Console.WriteLine("[Q] - выйти в меню.");
-                input = GetInputFromConsole(allowedInputBuilder.ToString());
-                switch (input)
+                consoleInput = GetInputFromConsole(allowedInput.ToString());
+                switch (consoleInput)
                 {
                     case "C":
                         Console.WriteLine(
                         "Укажите относительный или полный путь к txt файлу\n" +
                         "(например, Папка/file.txt или C:/file.txt)");
-                        string customPath = Console.ReadLine();
-                        if (File.Exists(customPath))
+                        string customFilePath = Console.ReadLine();
+                        if (File.Exists(customFilePath))
                         {
                             try
                             {
-                                resultList = XmlGenerator.DeserializeItemsFromFileToList(customPath);
+                                resultItemsList = XmlGenerator.DeserializeItemsFromFileToList(customFilePath);
                             }
                             catch (Exception ex)
                             {
@@ -467,20 +471,19 @@ namespace ItemOrderDemonstration.Classes
                         }
                         break;
                     case "S":
-                        correctXmlFiles = FolderHelper.GetItemXmlFilesInAppFolder();
+                        formattedXmlFiles = FolderHelper.GetItemXmlFilesInAppFolder();
                         break;
                     case "Q":
-                        exitFunction = true;
+                        isExitingFunction = true;
                         break;
                     default:
-                        string path;
-                        charToXml.TryGetValue(input, out path);
-                        if (!string.IsNullOrEmpty(path))
-                            resultList = correctXmlFiles[path];
+                        charToXmlFilePath.TryGetValue(consoleInput, out string filePath);
+                        if (!string.IsNullOrEmpty(filePath))
+                            resultItemsList = formattedXmlFiles[filePath];
                         break;
                 }
             }
-            return resultList;
+            return resultItemsList;
         }
 
         public static void GetMinsAndMaxsFromUser(int maxPoints, int maxItems,
@@ -501,10 +504,12 @@ namespace ItemOrderDemonstration.Classes
             }
             else
                 points = -1;
+
             minMaxWindows = Program.CurrentConfig?.MinMaxTimeWindows;
             if (minMaxWindows?.Item1 > minMaxWindows?.Item2)
                 throw new BadConfigException("Минимальное количество окон (" + minMaxWindows.Item1 + ") " +
                     "больше максимального количества (" + minMaxWindows.Item2 + ")");
+
             itemsPerWindow = Program.CurrentConfig?.MinMaxItemsPerWindow;
             if (itemsPerWindow != null)
                 if (itemsPerWindow.Item1 > minMaxWindows.Item2)
@@ -513,16 +518,19 @@ namespace ItemOrderDemonstration.Classes
                 else if (itemsPerWindow.Item2 > maxItems)
                     throw new BadConfigException("Максимальное количество товаров на окно (" + itemsPerWindow.Item2 + ") " +
                         "больше максимально возможных товаров (" + maxItems + ")");
+
             itemsCountPerPosition = Program.CurrentConfig?.MinMaxItemsCountPerPosition;
             if (itemsCountPerPosition?.Item1 > itemsCountPerPosition?.Item2)
                 throw new BadConfigException("Минимальное количество товаров на позицию (" + itemsCountPerPosition.Item1 + ") " +
                     "больше максимального количества (" + itemsCountPerPosition.Item2 + ")");
+
             timespanFromTo = Program.CurrentConfig?.TimeRange;
             if (timespanFromTo?.Item1 > timespanFromTo?.Item2)
                 throw new BadConfigException("Минимальное время в промежутке " +
                     "(" + timespanFromTo.Item1.ToString(Program.TIME_FORMAT) + ") " +
                     "больше максимального времени " +
                     "(" + timespanFromTo.Item2.ToString(Program.TIME_FORMAT) + ")");
+
             TimeSpan? configIntervalBetweenFromTo = Program.CurrentConfig?.IntervalBetweenTimeRange;
             if (configIntervalBetweenFromTo != null)
             {
@@ -604,11 +612,12 @@ namespace ItemOrderDemonstration.Classes
                 return returnDateFromConfig.Value;
 
             DateTime returnDate;
-            Console.WriteLine("Дата заказов");
             StringBuilder dateFormat =
                 new StringBuilder(System.Globalization.CultureInfo.InstalledUICulture.DateTimeFormat.ShortDatePattern);
             dateFormat = dateFormat.Replace("d", "д").Replace("M", "м").Replace("y", "г");
-            Console.WriteLine("Введите дату в формате " + dateFormat.ToString());
+
+            Console.WriteLine("Дата заказов\n" +
+                "Введите дату в формате " + dateFormat.ToString());
             do
             {
                 Console.Write(">");
@@ -644,13 +653,13 @@ namespace ItemOrderDemonstration.Classes
         {
             for (int i = 0; i < allowedInputs.Length; i++)
                 allowedInputs[i] = allowedInputs[i].ToUpper();
-            string input;
+            string consoleInput;
             do
             {
                 Console.Write(">");
-                input = Console.ReadLine().ToUpper();
-            } while (!allowedInputs.Contains(input));
-            return input;
+                consoleInput = Console.ReadLine().ToUpper();
+            } while (!allowedInputs.Contains(consoleInput));
+            return consoleInput;
         }
         const string INPUT_AWAIT_MSG = "Нажмите любую кнопку, чтобы продолжить...";
         public static void WaitForInput()
@@ -660,8 +669,8 @@ namespace ItemOrderDemonstration.Classes
         }
         public static bool GetCoordinatesFromConsole(out PointF northEast, out PointF southWest)
         {
-            string input = Console.ReadLine();
-            string[] coords = input.Replace(", ", ",").Split(",");
+            string consoleInput = Console.ReadLine();
+            string[] coords = consoleInput.Replace(", ", ",").Split(",");
             float nX = -1, nY = -1, sX = -1, sY = -1;
             bool success = true;
             if (coords.Length == 4)
@@ -678,8 +687,8 @@ namespace ItemOrderDemonstration.Classes
                 if (success is false)
                     goto coordinatesEnd;
                 Console.Write("Введите координаты юго-западного угла: ");
-                input = Console.ReadLine();
-                coords = input.Replace(", ", ",").Split(",");
+                consoleInput = Console.ReadLine();
+                coords = consoleInput.Replace(", ", ",").Split(",");
                 if (coords.Length == 2)
                 {
                     success = float.TryParse(coords[0], out sX);
@@ -688,22 +697,22 @@ namespace ItemOrderDemonstration.Classes
             }
             else
             {
-                success = float.TryParse(input, out nX);
+                success = float.TryParse(consoleInput, out nX);
                 if (success is false)
                     goto coordinatesEnd;
                 Console.Write("Введите Y - координату северо-восточного угла: ");
-                input = Console.ReadLine();
-                success = float.TryParse(input, out nY);
+                consoleInput = Console.ReadLine();
+                success = float.TryParse(consoleInput, out nY);
                 if (success is false)
                     goto coordinatesEnd;
                 Console.Write("Введите X - координату юго-западного угла: ");
-                input = Console.ReadLine();
-                success = float.TryParse(input, out sX);
+                consoleInput = Console.ReadLine();
+                success = float.TryParse(consoleInput, out sX);
                 if (success is false)
                     goto coordinatesEnd;
                 Console.Write("Введите Y - координату юго-западного угла: ");
-                input = Console.ReadLine();
-                success = float.TryParse(input, out sY);
+                consoleInput = Console.ReadLine();
+                success = float.TryParse(consoleInput, out sY);
                 if (success is false)
                     goto coordinatesEnd;
             }
@@ -728,34 +737,34 @@ namespace ItemOrderDemonstration.Classes
         public static int GetIntFromConsole()
         {
             int result;
-            string input;
+            string consoleInput;
             do
             {
                 Console.Write(">");
-                input = Console.ReadLine();
-            } while (!int.TryParse(input, out result));
+                consoleInput = Console.ReadLine();
+            } while (!int.TryParse(consoleInput, out result));
             return result;
         }
         public static double GetDoubleFromConsole()
         {
             double result;
-            string input;
+            string consoleInput;
             do
             {
                 Console.Write(">");
-                input = Console.ReadLine();
-            } while (!double.TryParse(input, out result));
+                consoleInput = Console.ReadLine();
+            } while (!double.TryParse(consoleInput, out result));
             return result;
         }
         public static float GetFloatFromConsole()
         {
             float result;
-            string input;
+            string consoleInput;
             do
             {
                 Console.Write(">");
-                input = Console.ReadLine();
-            } while (!float.TryParse(input, out result));
+                consoleInput = Console.ReadLine();
+            } while (!float.TryParse(consoleInput, out result));
             return result;
         }
         public static int GetIntInRange(int? rangeFrom = null, int? rangeTo = null)
@@ -798,7 +807,7 @@ namespace ItemOrderDemonstration.Classes
             } while (!timeString.Contains(":")
             || !TimeSpan.TryParse(timeString, out result)
             || result < TimeSpan.Zero);
-            //result = new TimeSpan(result.Hours, result.Minutes, 0);
+            //result = exampleConfig TimeSpan(result.Hours, result.Minutes, 0);
             return result;
         }
         public static Tuple<TimeSpan, TimeSpan> GetMinMaxHMTime()
