@@ -139,7 +139,7 @@ namespace ItemOrderDemonstration
             try
             {
                 pointsList = OverpassMethods.GetAllPlacesInBox(searchObj.CityNorthEast, searchObj.CitySouthWest, types);
-                if (pointsList is null)
+                if (pointsList.Count == 0)
                 {
                     throw new Exception("Места не были найдены");
                 }
