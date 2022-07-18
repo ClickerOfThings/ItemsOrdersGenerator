@@ -25,34 +25,34 @@ namespace ItemOrderDemonstration.Classes
         {
             List<Item> resultList = new List<Item>();
             using StreamReader reader = new StreamReader(txtFilePath);
-            int lineNum = 0; // для вывода строки, в которой произошла ошибка
+            int errorLineNum = 0; // для вывода строки, в которой произошла ошибка
             while (!reader.EndOfStream)
             {
-                lineNum++;
+                errorLineNum++;
                 string currentLine = reader.ReadLine().Replace("; ", ";");
-                var attrs = currentLine.Split(';');
+                var variables = currentLine.Split(';');
                 try
                 {
-                    if (attrs.Length != 3)
+                    if (variables.Length != 3)
                         throw new ArgumentException();
-                    Item newItem = StringsToSku(attrs);
+                    Item newItem = StringsToSku(variables);
                     resultList.Add(newItem);
                 }
                 catch(Exception ex)
                 {
-                    ConsoleColor prevForeColor = Console.ForegroundColor;
+                    ConsoleColor defaultForegroundColor = Console.ForegroundColor;
                     Console.ForegroundColor = ConsoleColor.Red;
                     if (ex is FormatException || ex is OverflowException)
                     {
                         throw new ArgumentException("Неправильный формат числа, либо слишком большое/маленькое число, " +
-                            "строка " + lineNum);
+                            "строка " + errorLineNum);
                     }
                     if (ex is ArgumentException)
                     {
-                        Console.ForegroundColor = prevForeColor;
-                        throw new ArgumentException("Количество переменных не равно 3, строка " + lineNum);
+                        Console.ForegroundColor = defaultForegroundColor;
+                        throw new ArgumentException("Количество переменных не равно 3, строка " + errorLineNum);
                     }
-                    Console.ForegroundColor = prevForeColor;
+                    Console.ForegroundColor = defaultForegroundColor;
                 }
             }
             return resultList;
@@ -65,6 +65,7 @@ namespace ItemOrderDemonstration.Classes
         /// <returns>Обработанный объект товара</returns>
         private static Item StringsToSku(string[] inputStrings)
         {
+            // приводим вес к нужному формату
             inputStrings[2] = inputStrings[2].Replace(",", ".");
             Item return_item = new Item()
             {

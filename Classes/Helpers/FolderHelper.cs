@@ -37,21 +37,21 @@ namespace ItemsOrdersGenerator.Classes.Helpers
         /// <returns>Словарь, ключ - путь к файлу, значение - список с десериализированными товарами</returns>
         public static Dictionary<string, List<Item>> GetItemXmlFilesInAppFolder()
         {
-            string[] files = System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory(), "*.xml");
-            Dictionary<string, List<Item>> result = new Dictionary<string, List<Item>>();
-            foreach (string file in files)
+            string[] itemsFiles = System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory(), "*.xml");
+            Dictionary<string, List<Item>> resultDictionary = new Dictionary<string, List<Item>>();
+            foreach (string itemFile in itemsFiles)
             {
                 try
                 {
-                    List<Item> tempList = XmlGenerator.DeserializeItemsFromFileToList(file);
-                    result.Add(file, tempList);
+                    List<Item> tempList = XmlGenerator.DeserializeItemsFromFileToList(itemFile);
+                    resultDictionary.Add(itemFile, tempList);
                 }
                 catch (Exception)
                 {
                     continue;
                 }
             }
-            return result;
+            return resultDictionary;
         }
     }
 }

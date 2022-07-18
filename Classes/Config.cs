@@ -243,10 +243,10 @@ namespace ItemOrderDemonstration.Classes
             if (!(value as PointF?).HasValue)
                 return;
             PointF point = (value as PointF?).Value;
-            JObject obj = new JObject();
-            obj.Add("X", point.X);
-            obj.Add("Y", point.Y);
-            obj.WriteTo(writer);
+            JObject resultPointJObj = new JObject();
+            resultPointJObj.Add("X", point.X);
+            resultPointJObj.Add("Y", point.Y);
+            resultPointJObj.WriteTo(writer);
             return;
         }
     }
@@ -283,10 +283,10 @@ namespace ItemOrderDemonstration.Classes
             Tuple<TimeSpan, TimeSpan> tuple = value as Tuple<TimeSpan, TimeSpan>;
             if (tuple is null)
                 writer.WriteNull();
-            JObject obj = new JObject();
-            obj.Add("From", tuple.Item1.ToString(Program.TIME_FORMAT));
-            obj.Add("To", tuple.Item2.Days == 1 ? "24:00" : tuple.Item2.ToString(Program.TIME_FORMAT));
-            obj.WriteTo(writer);
+            JObject resultTupleJObj = new JObject();
+            resultTupleJObj.Add("From", tuple.Item1.ToString(Program.TIME_FORMAT));
+            resultTupleJObj.Add("To", tuple.Item2.Days == 1 ? "24:00" : tuple.Item2.ToString(Program.TIME_FORMAT));
+            resultTupleJObj.WriteTo(writer);
             return;
         }
     }

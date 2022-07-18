@@ -17,7 +17,7 @@ namespace ItemOrderDemonstration.Classes
             Console.WriteLine("Справка по полям конфигурационного файла:");
 
             var configProperties = typeof(Config).GetProperties();
-            var standardColour = Console.ForegroundColor;
+            var defaultColour = Console.ForegroundColor;
             foreach(PropertyInfo property in configProperties)
             {
                 var jsonPropertyAttribute = property.GetCustomAttribute(typeof(Newtonsoft.Json.JsonPropertyAttribute))
@@ -42,7 +42,7 @@ namespace ItemOrderDemonstration.Classes
                 }
                 Console.WriteLine();
             }
-            Console.ForegroundColor = standardColour;
+            Console.ForegroundColor = defaultColour;
         }
     }
 }
