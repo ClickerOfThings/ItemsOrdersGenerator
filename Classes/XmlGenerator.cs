@@ -14,8 +14,16 @@ using System.Xml.Serialization;
 
 namespace ItemOrderDemonstration.Classes
 {
+    /// <summary>
+    /// Класс генератор XML файлов
+    /// </summary>
     internal static class XmlGenerator
     {
+        /// <summary>
+        /// Сериализовать список товаров в XML файл
+        /// </summary>
+        /// <param name="fileName">Путь выходного файла с товарами в формате XML</param>
+        /// <param name="itemsToSerialize">Список товаров, который необходимо сериализовать</param>
         public static void SerializeItemsListToFile(string fileName, List<Item> itemsToSerialize)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Item>), new XmlRootAttribute("skus"));
@@ -24,7 +32,11 @@ namespace ItemOrderDemonstration.Classes
             ns.Add("", ""); // убираем лишние неймспейсы
             serializer.Serialize(writer, itemsToSerialize, ns);
         }
-
+        /// <summary>
+        /// Десериализовать XML файл с товарами
+        /// </summary>
+        /// <param name="fileName">Путь к входному файлу с товарами в формате XML</param>
+        /// <returns>Десериализованный список товаров</returns>
         public static List<Item> DeserializeItemsFromFileToList(string fileName)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<Item>), new XmlRootAttribute("skus"));
@@ -33,7 +45,19 @@ namespace ItemOrderDemonstration.Classes
             return deserialised as List<Item>;
         }
 
-
+        /// <summary>
+        /// Создать файл заказов в формате XML
+        /// </summary>
+        /// <param name="items">Товары, которые будут использоваться в случайной генерации</param>
+        /// <param name="listOfPoints">Места, которые буду использоваться в создании заказов</param>
+        /// <param name="ordersDateTime">Глобальная дата заказов</param>
+        /// <param name="ordersFileName">Выходной путь заказов</param>
+        /// <param name="pointsCount">Количество мест, которые в итоге будут сгенерированы</param>
+        /// <param name="minMaxTimeWindows">Минимальное и максимальное количество временных окон</param>
+        /// <param name="minMaxItemsPerWindow">Минимальное и максимальное количество товаров на одно временное окно</param>
+        /// <param name="minMaxItemCountPerPosition">Минимальное и максимальное количество единиц товара на одну позицию</param>
+        /// <param name="timespanFromTo">Минимальное и максимальное время от и до</param>
+        /// <param name="intervalBetweenFromTo">Интервал между временем от и до</param>
         public static void GenerateOrdersFile(List<Item> items, List<OsmClass> listOfPoints,
             DateTime ordersDateTime, string ordersFileName, int pointsCount,
             Tuple<int, int> minMaxTimeWindows,

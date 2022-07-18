@@ -12,6 +12,7 @@ using System.Reflection;
 using ItemsOrdersGenerator.Classes.Model;
 using ItemsOrdersGenerator.Classes.Helpers;
 using ItemsOrdersGenerator.Classes.View;
+using ItemsOrdersGenerator.Classes.Extensions;
 
 namespace ItemOrderDemonstration.Classes
 {
@@ -22,12 +23,18 @@ namespace ItemOrderDemonstration.Classes
     internal partial class Config
     {
         /// <summary>
-        /// Создать пустой объект конфигурации
+        /// Конструктор пустого объекта конфигурации
         /// </summary>
         public Config()
         {
 
         }
+        /// <summary>
+        /// Создать объект конфигурации из файла
+        /// </summary>
+        /// <param name="filePath">Путь к файлу в формате json </param>
+        /// <returns>Объект конфигурации с заполненными полями из файла</returns>
+        /// <exception cref="BadConfigException">Одно из полей не прошло проверку</exception>
         public static Config ReadFromFile(string filePath)
         {
             Config resultConfig;
@@ -55,6 +62,10 @@ namespace ItemOrderDemonstration.Classes
             }
             return resultConfig;
         }
+        /// <summary>
+        /// Сериализовать объект конфигурации в файл формата json
+        /// </summary>
+        /// <param name="filePath">Путь к выходному файлу</param>
         public void WriteIntoJson(string filePath)
         {
             JsonSerializer serializer = JsonSerializer.Create();
@@ -66,24 +77,44 @@ namespace ItemOrderDemonstration.Classes
         }
 
         #region ORDERS Configuration Properties
+        /// <summary>
+        /// Название города, в котором будет вестись поиск 
+        /// (используется заместо координат прямоугольника)
+        /// </summary>
         [JsonProperty]
         [Description("Название города, в котором будет вестись поиск " +
             "(используется заместо координат прямоугольника)")]
         public string CityName { get; set; }
+        /// <summary>
+        /// Прямоугольник, в котором будет вестись поиск мест
+        /// </summary>
         [JsonProperty]
-        [Description("Прямоугольник, в котором будет вестись поиск точек")]
+        [Description("Прямоугольник, в котором будет вестись поиск мест")]
+        [CheckSearchRectangle]
         public SearchRectangle SearchRectangle { get; set; }
+        /// <summary>
+        /// Типы мест (OSM теги), которые будут искаться
+        /// </summary>
         [JsonProperty]
-        [Description("Типы точек, которые будут искаться. Под типами подразумеваются " +
+        [Description("Типы мест, которые будут искаться. Под типами подразумеваются " +
             "OSM теги, которые определяют, какое предназначение имеет тот или иной объект. Например, " +
             "jewelry - магазин ювелирных изделий, shop - магазин, и т.д.")]
         [Format("Типы объектов, разделяемые через запятую или через запятую и пробел " +
             "(jewelry, shop, park, carpenter)")]
         public string PlaceTypes { get; set; }
+        /// <summary>
+        /// Путь к файлу с товарами, которые будут представлены в позициях
+        /// </summary>
         [JsonProperty]
         [Description("Путь к файлу с товарами, которые будут представлены в позициях")]
         public string ItemsFilePathInput { get; set; }
+        /// <summary>
+        /// Дата заказов (не сериализуется)
+        /// </summary>
         public DateTime? OrderDate;
+        /// <summary>
+        /// Представление даты заказов с форматированием (сериализуется)
+        /// </summary>
         [JsonProperty(PropertyName = "OrderDate")]
         [Description("Дата заказов")]
         public string OrderDateView
@@ -103,33 +134,51 @@ namespace ItemOrderDemonstration.Classes
                     OrderDate = ParseHelper.ParseDateTimeFromSystemCulture(value).Date;
             }
         }
-        //private int _pointsCount;
+        /// <summary>
+        /// Количество используемых в генерации мест
+        /// </summary>
         [JsonProperty]
-        [Description("Количество используемых в генерации точек")]
+        [Description("Количество используемых в генерации мест")]
         [CheckNumberForMin(1)]
         public int? PointsCount { get; set; }
+        /// <summary>
+        /// Минимальное и максимальное количество временных окон
+        /// </summary>
         [JsonProperty]
         [Description("Минимальное и максимальное количество временных окон")]
-        [CheckNumberTupleForMin(1)]
+        [CheckIntTupleForMin(1)]
         public MinMaxTupleJson<int, int> MinMaxTimeWindows { get; set; }
+        /// <summary>
+        /// Минимальное и максимальное количество товаров в одном временном окне
+        /// </summary>
         [JsonProperty]
-        [Description("Минимальное и максимальное количество товаров в одном временном окне, " +
-            "используемое в случайной генерации")]
-        [CheckNumberTupleForMin(1)]
+        [Description("Минимальное и максимальное количество товаров в одном временном окне")]
+        [CheckIntTupleForMin(1)]
         public MinMaxTupleJson<int, int> MinMaxItemsPerWindow { get; set; }
+        /// <summary>
+        /// Минимальное и максимальное количество товаров в одной позиции
+        /// </summary>
         [JsonProperty]
-        [Description("Минимальное и максимальное количество товаров в одной позиции, " +
-            "используемое в случайной генерации")]
-        [CheckNumberTupleForMin(1)]
+        [Description("Минимальное и максимальное количество товаров в одной позиции")]
+        [CheckIntTupleForMin(1)]
         public MinMaxTupleJson<int, int> MinMaxItemsCountPerPosition { get; set; }
+        /// <summary>
+        /// Промежуток времени от и до, в котором создаются позиции
+        /// </summary>
         [JsonProperty]
-        [Description("Промежуток времени от и до, в котором создаются заказы")]
+        [Description("Промежуток времени от и до, в котором создаются позиции")]
         [Format("чч:мм. Секунды не учитываются в работе программы")]
-        [JsonConverter(typeof(TimeSpanTupleConverter))]
+        [JsonConverter(typeof(TimeSpanRangeTupleConverter))]
         [CheckTimeSpanTupleForMin(0, 0)]
         public Tuple<TimeSpan, TimeSpan> TimeRange { get; set; }
+        /// <summary>
+        /// Интервал между минимальным и максимальным временем (не сериализуется)
+        /// </summary>
         [CheckTimeSpanForMin(0, 0)]
         public TimeSpan? IntervalBetweenTimeRange { get; set; }
+        /// <summary>
+        /// Интервал между минимальным и максимальным временем с форматированием (сериализуется)
+        /// </summary>
         [JsonProperty(PropertyName = "IntervalBetweenTimeRange")]
         [Description("Интервал между минимальным и максимальным временем")]
         public string IntervalBetweenTimeRangeView
@@ -141,25 +190,36 @@ namespace ItemOrderDemonstration.Classes
                 IntervalBetweenTimeRange = new TimeSpan(temp.Hours, temp.Minutes, 0);
             }
         }
+        /// <summary>
+        /// Путь выходного файла с заказами
+        /// </summary>
         [JsonProperty]
         [Description("Путь выходного файла с заказами")]
         public string OrdersFilePathOutput { get; set; }
         #endregion
 
         #region ITEMS Configuration Properties
+        /// <summary>
+        /// Путь TXT-файла с товарами, используемого для создания XML-файла товаров
+        /// </summary>
         [JsonProperty]
-        [Description("Путь TXT-файла с товарами, используемые для создания XML-файла товаров")]
+        [Description("Путь TXT-файла с товарами, используемого для создания XML-файла товаров")]
         [Format("Один товар указывается на одну строку. " +
             "Вводятся три переменные, разделяемые точкой с запятой (;): " +
                             "Название товара, количество товара в 1 упаковке, вес в килограммах (допускается " +
                             "ввод десятичного числа, например 0.100)")]
         public string TxtItemFilePathInput { get; set; }
+        /// <summary>
+        /// Путь выходного XML-файла с товарами
+        /// </summary>
         [JsonProperty]
         [Description("Путь выходного XML-файла с товарами")]
         public string XmlItemFilePathOutput { get; set; }
         #endregion
     }
-
+    /// <summary>
+    /// Класс конвертации класса <see cref="PointF"/> в формат json и обратно
+    /// </summary>
     internal class PointFStringJsonConverter : JsonConverter
     {
         public override bool CanRead => true;
@@ -190,7 +250,11 @@ namespace ItemOrderDemonstration.Classes
             return;
         }
     }
-    internal class TimeSpanTupleConverter : JsonConverter
+    /// <summary>
+    /// Класс для конвертации промежутка времени от и до с возможностью 
+    /// указать "24:00" в качестве конечного времени
+    /// </summary>
+    internal class TimeSpanRangeTupleConverter : JsonConverter
     {
         public override bool CanRead => true;
         public override bool CanWrite => true;
@@ -226,7 +290,10 @@ namespace ItemOrderDemonstration.Classes
             return;
         }
     }
-
+    /// <summary>
+    /// Атрибут для описания формата поля или файла, который считывается для вставки значения в поле. 
+    /// Используется в методе вывода помощи по полям конфигурации
+    /// </summary>
     public class FormatAttribute : Attribute
     {
         public string FormatDescription { get; set; }
@@ -235,14 +302,19 @@ namespace ItemOrderDemonstration.Classes
             FormatDescription = formatDescription;
         }
     }
-
+    /// <summary>
+    /// Исключение неправильной конфигурации, либо во время считывания, либо во время непосредственного 
+    /// использования
+    /// </summary>
     public class BadConfigException : Exception
     {
         public BadConfigException(string message) : base(message)
         {
         }
     }
-
+    /// <summary>
+    /// Атрибут проверки поля на минимальное значение
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CheckNumberForMin : Attribute, IPropertyValidation
     {
@@ -260,12 +332,15 @@ namespace ItemOrderDemonstration.Classes
             return true;
         }
     }
+    /// <summary>
+    /// Атрибут проверки поля типа кортежа с двумя <see cref="int"/> на минимальное значение
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class CheckNumberTupleForMin : Attribute, IPropertyValidation
+    public class CheckIntTupleForMin : Attribute, IPropertyValidation
     {
         private int minRequired;
         public string ErrorMessage { get => "Одно из чисел меньше " + minRequired; }
-        public CheckNumberTupleForMin(int minRequired)
+        public CheckIntTupleForMin(int minRequired)
         {
             this.minRequired = minRequired;
         }
@@ -273,13 +348,16 @@ namespace ItemOrderDemonstration.Classes
         {
             Tuple<int, int> tuple = value as Tuple<int, int>;
             if (tuple is null)
-                throw new ArgumentException("Свойство с атрибутом " + nameof(CheckNumberTupleForMin)
+                throw new ArgumentException("Свойство с атрибутом " + nameof(CheckIntTupleForMin)
                     + " не является типом " + typeof(Tuple<int, int>).Name);
             if (tuple.Item1 < minRequired || tuple.Item2 < minRequired)
                 return false;
             return true;
         }
     }
+    /// <summary>
+    /// Атрибут проверки поля типа <see cref="TimeSpan"/> на минимальное время
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CheckTimeSpanForMin : Attribute, IPropertyValidation
     {
@@ -297,6 +375,9 @@ namespace ItemOrderDemonstration.Classes
             return true;
         }
     }
+    /// <summary>
+    /// Атрибут проверки поля типа кортежа с двумя <see cref="TimeSpan"/> на минимальное время
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CheckTimeSpanTupleForMin : Attribute, IPropertyValidation
     {
@@ -318,10 +399,41 @@ namespace ItemOrderDemonstration.Classes
             return true;
         }
     }
+    /// <summary>
+    /// Атрибут проверки поля типа <see cref="SearchRectangle"/> на корректно введёные данные 
+    /// (северо-восточный угол должен быть больше юго-западного угла как в X, так и в Y)
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    public class CheckSearchRectangle : Attribute, IPropertyValidation
+    {
+        string IPropertyValidation.ErrorMessage =>
+            "Северо-восточный угол должен быть больше юго-западного угла как в X, так и в Y";
 
+        bool IPropertyValidation.ValidateProperty(object value)
+        {
+            SearchRectangle rect = value as SearchRectangle;
+            if (rect is null)
+                throw new ArgumentException("Свойство с атрибутом " + nameof(CheckSearchRectangle)
+                    + " не является типом " + typeof(SearchRectangle).Name);
+            if (rect.NorthEastCorner.CompareTo(rect.SouthWestCorner) != 1)
+                return false;
+            return true;
+        }
+    }
+    /// <summary>
+    /// Интерфейс проверки поля. Используется для атрибутов полей во время создания конфигурационного файла
+    /// </summary>
     public interface IPropertyValidation
     {
+        /// <summary>
+        /// Провести проверку поля
+        /// </summary>
+        /// <param name="value">Значение поля</param>
+        /// <returns>true если поле имеет корректное значение, false если нет</returns>
         public bool ValidateProperty(object value);
+        /// <summary>
+        /// Сообщение об ошибке в случае некорректного значения поля во время проверки
+        /// </summary>
         public string ErrorMessage { get; }
     }
 }

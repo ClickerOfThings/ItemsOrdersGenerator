@@ -6,7 +6,10 @@ using System.Text;
 
 namespace ItemOrderDemonstration.Classes
 {
-    internal static class ModelGenerator
+    /// <summary>
+    /// Класс генерации товаров из txt файла
+    /// </summary>
+    internal static class ItemModelGenerator
     {
         /// <summary>
         /// Парсинг txt файла для извлечения данных о товаре

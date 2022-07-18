@@ -5,6 +5,9 @@ using System.Text;
 
 namespace ItemsOrdersGenerator.Classes.Extensions
 {
+    /// <summary>
+    /// Класс расширения списка
+    /// </summary>
     internal static class ListExtension
     {
         /// <summary>

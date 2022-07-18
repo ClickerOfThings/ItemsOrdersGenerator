@@ -1,6 +1,7 @@
 ﻿using ItemsOrdersGenerator.Classes.Helpers;
 using ItemsOrdersGenerator.Classes.Model;
 using ItemsOrdersGenerator.Classes.View;
+using ItemsOrdersGenerator.Classes.Extensions;
 using OverpassLibrary;
 using System;
 using System.Collections.Generic;
@@ -11,10 +12,25 @@ using System.Text;
 
 namespace ItemOrderDemonstration.Classes
 {
+    /// <summary>
+    /// Класс консольного ввода
+    /// </summary>
     internal static class ConsoleInput
     {
+        /// <summary>
+        /// Стандартное название выходного файла для товаров в формате XML
+        /// </summary>
         private const string DEFAULT_ITEMS_OUTPUT_FILE = "items.xml";
+        /// <summary>
+        /// Стандартное название выходного файла для заказов в формате XML
+        /// </summary>
         private const string DEFAULT_ORDERS_OUTPUT_FILE = "orders.xml";
+        /// <summary>
+        /// Создать конфигурационный файл из пути, предоставленный пользователем, либо отказаться 
+        /// от конфигурации в пользу ручного ввода
+        /// </summary>
+        /// <returns>Объект конфигурации или null, если пользователь отказался от использования 
+        /// конфигурационного файла</returns>
         public static Config GetConfigFile()
         {
             Config resultConfig = null;
@@ -23,7 +39,7 @@ namespace ItemOrderDemonstration.Classes
             string configPath = string.Empty;
             Dictionary<string, string> charToConfigPath = new Dictionary<string, string>();
             string consoleInput;
-            while (!isExitingFunction)
+            while (!isExitingFunction && resultConfig is null)
             {
                 Console.Clear();
 
@@ -114,7 +130,7 @@ namespace ItemOrderDemonstration.Classes
                     try
                     {
                         resultConfig = Config.ReadFromFile(configPath);
-                        isExitingFunction = true;
+                        //isExitingFunction = true;
                     }
                     catch (Exception ex)
                     {
@@ -127,7 +143,10 @@ namespace ItemOrderDemonstration.Classes
             }
             return resultConfig;
         }
-
+        /// <summary>
+        /// Получить от пользователя путь к входному TXT файлу с товарами. Формат файла не проверяется
+        /// </summary>
+        /// <returns>Путь к входному TXT файлу с товарами</returns>
         public static string GetItemTxtPathFromUser()
         {
             bool isExitingFunction = false;
@@ -203,7 +222,12 @@ namespace ItemOrderDemonstration.Classes
             }
             return resultItemPath;
         }
-
+        /// <summary>
+        /// Получить входной и выходной пути файлов для создания файла с товарами
+        /// </summary>
+        /// <param name="inputItemsFilePath">Входной путь к TXT файлу с товарами 
+        /// (формат файла не проверяется)</param>
+        /// <param name="outputFilePath">Выходной путь XML файла с товарами</param>
         public static void GetItemFilesPathsFromUser(out string inputItemsFilePath, out string outputFilePath)
         {
             inputItemsFilePath = Program.CurrentConfig?.TxtItemFilePathInput;
@@ -225,7 +249,13 @@ namespace ItemOrderDemonstration.Classes
                     outputFilePath = DEFAULT_ITEMS_OUTPUT_FILE;
             }
         }
-
+        /// <summary>
+        /// Получить OSM объект от пользователя (город или прямоугольник)
+        /// </summary>
+        /// <returns>Объект класса <see cref="OsmClass"/>, в котором гарантированно будет 
+        /// указан прямоугольник, либо null, если пользователь отказался выбирать место поиска</returns>
+        /// <exception cref="BadConfigException">Указанный город из конфигурации не был найден, либо 
+        /// указанный прямоугольник из конфигурации неправильного формата</exception>
         public static OsmClass GetOsmObjectFromUser()
         {
             bool isExitingFunction = false;
@@ -243,8 +273,9 @@ namespace ItemOrderDemonstration.Classes
             SearchRectangle rectFromConfig = Program.CurrentConfig?.SearchRectangle;
             if (foundCity is null && rectFromConfig != null)
             {
-                if (ComparePoints(rectFromConfig.NorthEastCorner, rectFromConfig.SouthWestCorner) == 1)
-                    throw new BadConfigException("В прямоугольнике северо-восточный угол больше юго-восточного");
+                if (rectFromConfig.NorthEastCorner.CompareTo(rectFromConfig.SouthWestCorner) != 1)
+                    throw new BadConfigException("В прямоугольнике северо-восточный угол должен быть " +
+                        "больше юго-восточного угла как в X, так и в Y");
                 else
                     foundCity = new OsmClass
                     {
@@ -276,11 +307,6 @@ namespace ItemOrderDemonstration.Classes
                     case "2":
                         PointF northEastPoint, southWestPoint;
                         Console.Clear();
-                        Console.WriteLine("Введите координаты. Принимаются следующие форматы (без скобочек):\n" +
-                            "(40.1234) - одна точка, последовательно принимаются все четыре точки координат;\n" +
-                            "(40.1234, 40.4321) - точка северо-восточного угла, в последующем ожидается " +
-                            "точка юго-западного угла;\n" +
-                            "(40.1234, 40.4321, 45.1234, 45.4321) - точка северо-восточного и юго-западного угла.");
                         if (GetCoordinatesFromConsole(out northEastPoint, out southWestPoint))
                         {
                             isExitingFunction = true;
@@ -303,6 +329,14 @@ namespace ItemOrderDemonstration.Classes
             }
             return foundCity;
         }
+        /// <summary>
+        /// Получить один город из списка городов от пользователя
+        /// </summary>
+        /// <param name="listToGetFrom">Список с городами, из которого один город 
+        /// должен выбрать пользователь</param>
+        /// <returns>Объект города</returns>
+        /// <remarks>Cписок с городами может быть пустым или содержать только один город. 
+        /// В таких случаях, пользователю не будет даваться выбор (демократия)</remarks>
         public static OsmClass GetOneCityFromList(List<OsmClass> listToGetFrom)
         {
             if (listToGetFrom is null || listToGetFrom.Count == 0)
@@ -325,6 +359,10 @@ namespace ItemOrderDemonstration.Classes
 
             return charToCity[GetInputFromConsole(allowedInput.ToString())];
         }
+        /// <summary>
+        /// Получить список типов мест от пользователя
+        /// </summary>
+        /// <returns>Массив строк с типами мест, либо null, если пользователь отказался от выбора типов</returns>
         public static string[] GetPlaceTypesFromUser()
         {
             bool isExitingFunction = false;
@@ -392,7 +430,12 @@ namespace ItemOrderDemonstration.Classes
             }
             return resultTypes;
         }
-
+        /// <summary>
+        /// Получить список товаров от пользователя
+        /// </summary>
+        /// <returns>Список с товарами, либо null, если пользователь отказался от выбора</returns>
+        /// <exception cref="BadConfigException">Файла с товарами не существует, либо ошибка 
+        /// во время парсинга файла с товарами</exception>
         public static List<Item> GetItemsFromUser()
         {
             bool isExitingFunction = false;
@@ -485,14 +528,27 @@ namespace ItemOrderDemonstration.Classes
             }
             return resultItemsList;
         }
-
-        public static void GetMinsAndMaxsFromUser(int maxPoints, int maxItems,
+        /// <summary>
+        /// Получить поля для случайной генерации от пользователя
+        /// </summary>
+        /// <param name="maxPoints">Максимальное количество мест, которое может выбрать пользователь</param>
+        /// <param name="maxItems">Максимальное количество товаров на одно место, 
+        /// которое может выбрать пользователь</param>
+        /// <param name="points">Выбранное количество точек</param>
+        /// <param name="minMaxWindows">Выбранное минимальное и максимальное количество временных окон</param>
+        /// <param name="itemsPerWindow">Выбранное минимальное и максимальное количество товаров на одно временное окно</param>
+        /// <param name="itemsCountPerPosition">Выбранное минимальное и максимальное количество единиц товара на одну позицию</param>
+        /// <param name="timespanFromTo">Выбранный промежуток от и до на временные окна</param>
+        /// <param name="intervalBetweenFromTo">Выбранный интервал между временами от и до</param>
+        /// <exception cref="BadConfigException">Одно из полей из конфигурации указано неверно</exception>
+        /// <exception cref="BadIntervalException">Неправильный интервал из конфигурации</exception>
+        public static void GetValuesForRandomFromUser(int maxPoints, int maxItems,
             out int points, out Tuple<int, int> minMaxWindows,
             out Tuple<int, int> itemsPerWindow, out Tuple<int, int> itemsCountPerPosition,
             out Tuple<TimeSpan, TimeSpan> timespanFromTo, out TimeSpan intervalBetweenFromTo)
         {
         MinsMaxStart:
-            #region Config Values Set And Check);
+            #region Config Values;
             int? configPoints = Program.CurrentConfig?.PointsCount;
             if (configPoints != null)
             {
@@ -604,7 +660,10 @@ namespace ItemOrderDemonstration.Classes
                 itemsCountPerPosition = GetIntMinMax(1);
             }
         }
-
+        /// <summary>
+        /// Получить дату от пользователя (день, месяц, год) с форматированием операционной системы
+        /// </summary>
+        /// <returns>Объект даты</returns>
         public static DateTime GetDateFromUser()
         {
             DateTime? returnDateFromConfig = Program.CurrentConfig?.OrderDate;
@@ -625,7 +684,10 @@ namespace ItemOrderDemonstration.Classes
                     returnDate.TimeOfDay != TimeSpan.Zero);
             return returnDate;
         }
-
+        /// <summary>
+        /// Получить путь выходного файла для заказов от пользователя
+        /// </summary>
+        /// <param name="outputOrdersFile">Путь выходного файла</param>
         public static void GetOrderFilesPathsFromUser(out string outputOrdersFile)
         {
             outputOrdersFile = Program.CurrentConfig?.OrdersFilePathOutput;
@@ -641,14 +703,31 @@ namespace ItemOrderDemonstration.Classes
 
         #region Tech Methods
 
-        /// <param name="allowedInputs">Сплошная строка с разрешёнными вводимыми символами, разделяемые пробелом</param>
-        /// <returns></returns>
+        /// <summary>
+        /// Ввод с консоли только разрешённых строк
+        /// </summary>
+        /// <param name="allowedInputs">Разрешённый ввод сплошной строкой, разделяется пробелом. 
+        /// См. <see cref="GetInputFromConsole(string[])"/></param>
+        /// <returns>Строка, введённая пользователем</returns>
         public static string GetInputFromConsole(string allowedInputs)
         {
             return GetInputFromConsole(allowedInputs.Trim().Split(" "));
         }
-        /// <returns>Введённая пользователем строка, переведённая в верхний регистр</returns>
-        /// TODO сделать параметр а-ля сохранение регистра
+        /// <summary>
+        /// Ввод с консоли только разрешённых строк
+        /// </summary>
+        /// <param name="allowedInputs">Массив строк, которые может ввести пользователь</param>
+        /// <returns>Строка, введёная пользователем, которая гарантированно будет в массиве <paramref name="allowedInputs"/></returns>
+        /// <remarks>Данный метод позволяет указать только тот ввод, который может ввести пользователь. Этот метод 
+        /// полезен при выборе пунктов в меню, чтобы пользователь не мог вводить что угодно, а только то, 
+        /// что необходимо программе</remarks>
+        /// <example>
+        /// <code>
+        /// Перегрузка метода со сплошной строкой:
+        /// GetInputFromConsole("W Q D S PP");
+        /// Пользователь сможет ввести только символы W, Q, D, S, либо строку PP
+        /// </code>
+        /// </example>
         public static string GetInputFromConsole(string[] allowedInputs)
         {
             for (int i = 0; i < allowedInputs.Length; i++)
@@ -662,13 +741,28 @@ namespace ItemOrderDemonstration.Classes
             return consoleInput;
         }
         const string INPUT_AWAIT_MSG = "Нажмите любую кнопку, чтобы продолжить...";
+        /// <summary>
+        /// Остановить вывод консоли, пока пользователь не нажмёт любую кнопку
+        /// </summary>
         public static void WaitForInput()
         {
             Console.WriteLine(INPUT_AWAIT_MSG);
             Console.ReadKey();
         }
+        /// <summary>
+        /// Получить от пользователя координаты двух точек - северо-восточную и юго-западную
+        /// </summary>
+        /// <param name="northEast">Северо-восточная тока</param>
+        /// <param name="southWest">Юго-западная</param>
+        /// <returns>true если удалось ввести координаты, false если координаты введены неправильно, или 
+        /// северо-восточный угол не больше юго-западного</returns>
         public static bool GetCoordinatesFromConsole(out PointF northEast, out PointF southWest)
         {
+            Console.WriteLine("Введите координаты. Принимаются следующие форматы (без скобочек):\n" +
+                            "(45.1234) - одна точка, последовательно принимаются все четыре точки координат;\n" +
+                            "(45.1234, 45.4321) - точка северо-восточного угла, в последующем ожидается " +
+                            "точка юго-западного угла;\n" +
+                            "(45.1234, 45.4321, 40.1234, 40.4321) - точка северо-восточного и юго-западного угла.");
             string consoleInput = Console.ReadLine();
             string[] coords = consoleInput.Replace(", ", ",").Split(",");
             float nX = -1, nY = -1, sX = -1, sY = -1;
@@ -719,21 +813,14 @@ namespace ItemOrderDemonstration.Classes
         coordinatesEnd:
             northEast = new PointF(nX, nY);
             southWest = new PointF(sX, sY);
-            if (ComparePoints(northEast, southWest) == 1)
+            if (northEast.CompareTo(southWest) == -1)
                 return false;
             return success;
         }
-        public static int ComparePoints(PointF first, PointF second)
-        {
-            if (first.X > second.X ||
-                first.Y > second.Y)
-                return 1;
-            else if (first.X < second.X ||
-                first.Y < second.Y)
-                return -1;
-            else
-                return 0;
-        }
+        /// <summary>
+        /// Получить переменную типа <see cref="int"/> от пользователя
+        /// </summary>
+        /// <returns>Целое число, введённое пользователем</returns>
         public static int GetIntFromConsole()
         {
             int result;
@@ -745,6 +832,10 @@ namespace ItemOrderDemonstration.Classes
             } while (!int.TryParse(consoleInput, out result));
             return result;
         }
+        /// <summary>
+        /// Получить переменную типа <see cref="double"/> от пользователя
+        /// </summary>
+        /// <returns>Число двойной точности, введённое пользователем</returns>
         public static double GetDoubleFromConsole()
         {
             double result;
@@ -756,6 +847,10 @@ namespace ItemOrderDemonstration.Classes
             } while (!double.TryParse(consoleInput, out result));
             return result;
         }
+        /// <summary>
+        /// Получить переменную типа <see cref="float"/> от пользователя
+        /// </summary>
+        /// <returns>Число с плавающей точкой, введённое пользователем</returns>
         public static float GetFloatFromConsole()
         {
             float result;
@@ -767,6 +862,12 @@ namespace ItemOrderDemonstration.Classes
             } while (!float.TryParse(consoleInput, out result));
             return result;
         }
+        /// <summary>
+        /// Получить переменную типа <see cref="int"/> от пользователя в указанном диапазоне
+        /// </summary>
+        /// <param name="rangeFrom">Минимальное значение включительно, либо null, чтобы не учитывать</param>
+        /// <param name="rangeTo">Максимальное значение вкючительно, либо null, чтобы не учитывать</param>
+        /// <returns>Число, введённое пользователем, в указанном диапазоне</returns>
         public static int GetIntInRange(int? rangeFrom = null, int? rangeTo = null)
         {
             int result;
@@ -778,7 +879,13 @@ namespace ItemOrderDemonstration.Classes
                 (rangeTo.HasValue && result > rangeTo.Value)));
             return result;
         }
-
+        /// <summary>
+        /// Получить кортеж минимального и максимального значения от пользователя (доступен ввод в диапазоне)
+        /// </summary>
+        /// <param name="min">Минимальное значение включительно, либо null, чтобы не учитывать</param>
+        /// <param name="max">Максимальное значение вкючительно, либо null, чтобы не учитывать</param>
+        /// <returns>Кортеж минимального и максимального значений, введённых пользователем 
+        /// (если указан диапазон - числа будут в этом диапазоне)</returns>
         public static Tuple<int, int> GetIntMinMax(int? min = null, int? max = null)
         {
             int newMin, newMax;
@@ -793,6 +900,10 @@ namespace ItemOrderDemonstration.Classes
             newMax = GetIntInRange(min, max);
             return new Tuple<int, int>(newMin, newMax);
         }
+        /// <summary>
+        /// Получить час и минуту от пользователя (с возможностью указать 24:00)
+        /// </summary>
+        /// <returns>Объект класса <see cref="TimeSpan"/> с часами и минутами, введённые пользователем</returns>
         public static TimeSpan GetHMTimeFromConsole()
         {
             TimeSpan result;
@@ -810,6 +921,10 @@ namespace ItemOrderDemonstration.Classes
             //result = exampleConfig TimeSpan(result.Hours, result.Minutes, 0);
             return result;
         }
+        /// <summary>
+        /// Получить минимум и ммксимум времени от пользователя
+        /// </summary>
+        /// <returns>Кортеж с минимальным и максимальным временами</returns>
         public static Tuple<TimeSpan, TimeSpan> GetMinMaxHMTime()
         {
             Console.WriteLine("Минимум времени");

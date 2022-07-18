@@ -117,7 +117,7 @@ namespace ItemOrderDemonstration
             try
             {
                 Console.WriteLine("Файл создаётся, подождите...");
-                XmlGenerator.SerializeItemsListToFile(outputFilePath, ModelGenerator.ParseTxtItemsIntoList(inputItemsFilePath));
+                XmlGenerator.SerializeItemsListToFile(outputFilePath, ItemModelGenerator.ParseTxtItemsIntoList(inputItemsFilePath));
                 Console.WriteLine("Файл был успешно создан.");
             }
             catch (Exception ex)
@@ -166,7 +166,7 @@ namespace ItemOrderDemonstration
             DateTime ordersDateTime = ConsoleInput.GetDateFromUser();
             Console.Clear();
 
-            ConsoleInput.GetMinsAndMaxsFromUser(foundPointsList.Count, foundItemsList.Count,
+            ConsoleInput.GetValuesForRandomFromUser(foundPointsList.Count, foundItemsList.Count,
                 out int pointsCount,
                 out Tuple<int, int> windows,
                 out Tuple<int, int> itemsPerWindow,
