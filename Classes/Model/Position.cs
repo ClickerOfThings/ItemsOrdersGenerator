@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace ItemsOrdersGenerator.Classes.Model
@@ -16,6 +14,7 @@ namespace ItemsOrdersGenerator.Classes.Model
         /// </summary>
         [XmlElement("sku")]
         public Guid ItemId { get; set; }
+
         /// <summary>
         /// Количество товара <see cref="ItemId"/>
         /// </summary>

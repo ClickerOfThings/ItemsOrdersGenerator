@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ItemsOrdersGenerator.Classes.View
 {
@@ -17,12 +15,14 @@ namespace ItemsOrdersGenerator.Classes.View
         [JsonProperty(PropertyName = "Min")]
         [JsonRequired]
         public new T1 Item1 { get; }
+
         /// <summary>
         /// Максимальное значение
         /// </summary>
         [JsonProperty(PropertyName = "Max")]
         [JsonRequired]
         public new T2 Item2 { get; }
+
         /// <summary>
         /// Стандартный конструктор кортежа
         /// </summary>
@@ -34,6 +34,7 @@ namespace ItemsOrdersGenerator.Classes.View
             Item2 = base.Item2;
         }
     }
+
     /// <summary>
     /// Класс кортежа, используемый, в основном, для обозначения времени "от" и "до"
     /// </summary>
@@ -46,12 +47,14 @@ namespace ItemsOrdersGenerator.Classes.View
         [JsonProperty(PropertyName = "From")]
         [JsonRequired]
         public new T1 Item1 { get; }
+
         /// <summary>
         /// Значение "до"
         /// </summary>
         [JsonProperty(PropertyName = "To")]
         [JsonRequired]
         public new T2 Item2 { get; }
+
         /// <summary>
         /// Стандартный конструктор кортежа
         /// </summary>

@@ -1,10 +1,8 @@
 ﻿using ItemOrderDemonstration;
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
-using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace ItemsOrdersGenerator.Classes.Model
@@ -20,6 +18,7 @@ namespace ItemsOrdersGenerator.Classes.Model
         /// </summary>
         [XmlIgnore]
         public TimeSpan From { get; set; }
+
         /// <summary>
         /// View-свойство начала времени запроса, который сериализируется 
         /// в xml файл с форматированием из метода <see cref="FormatTimeSpanValues(TimeSpan)"/>
@@ -36,11 +35,13 @@ namespace ItemsOrdersGenerator.Classes.Model
                 From = TimeSpan.Parse(value);
             }
         }
+
         /// <summary>
         /// Окончание время запроса (не сериализируется в xml файле)
         /// </summary>
         [XmlIgnore]
         public TimeSpan To { get; set; }
+
         /// <summary>
         /// View-свойство конца времени запроса, который сериализируется 
         /// в xml файл с форматированием из метода <see cref="FormatTimeSpanValues(TimeSpan)"/>
@@ -57,11 +58,13 @@ namespace ItemsOrdersGenerator.Classes.Model
                 To = TimeSpan.Parse(value);
             }
         }
+
         /// <summary>
         /// Позиция товара
         /// </summary>
         [XmlElement("position")]
         public Position Position { get; set; }
+
         /// <summary>
         /// Форматирование значений из TimeSpan для форматирования в xml файл заказов
         /// </summary>
@@ -93,6 +96,7 @@ namespace ItemsOrdersGenerator.Classes.Model
                 return resultTimeFormatted.ToString();
             }
         }
+
         /// <summary>
         /// Итератор случайных временных отрезков
         /// </summary>
@@ -141,6 +145,7 @@ namespace ItemsOrdersGenerator.Classes.Model
                 yield return new Tuple<TimeSpan, TimeSpan>(from, to);
             }
         }
+
         /// <summary>
         /// Случайное время в пределах временного отрезка
         /// </summary>
@@ -155,6 +160,7 @@ namespace ItemsOrdersGenerator.Classes.Model
             TimeSpan resultTimepan = new TimeSpan((long)(ticksFrom + (ticksTo - ticksFrom) * randomNumber));
             return resultTimepan.Subtract(new TimeSpan(0, 0, 0, resultTimepan.Seconds, resultTimepan.Milliseconds));
         }
+
         /// <summary>
         /// Получить одну часть от деления временного отрезка на <paramref name="divideIntoParts"/>
         /// </summary>
@@ -164,6 +170,7 @@ namespace ItemsOrdersGenerator.Classes.Model
         /// <returns>Часть деления временного отрезка</returns>
         public static TimeSpan GetOnePartIntervalBetween(TimeSpan from, TimeSpan to, int divideIntoParts)
             => (to - from) / divideIntoParts;
+
         /// <summary>
         /// Проверить, возможен ли интервал во временном промежутке с определённым количеством временных окон
         /// </summary>
@@ -180,6 +187,7 @@ namespace ItemsOrdersGenerator.Classes.Model
             return interval > intervalBetweenFromTo;
         }
     }
+
     /// <summary>
     /// Исключение неправильного интервала
     /// </summary>
@@ -190,6 +198,7 @@ namespace ItemsOrdersGenerator.Classes.Model
                     "Максимально возможный промежуток между минимумом и максимумом - %0" +
                     ", текущий промежуток - %1";
         public override string Message { get; }
+
         public BadIntervalException(TimeSpan minimalTime, TimeSpan maximumTime, TimeSpan interval, int timeWindows)
         {
             StringBuilder resultErrorMessage = new StringBuilder(BAD_INTERVAL_MSG);

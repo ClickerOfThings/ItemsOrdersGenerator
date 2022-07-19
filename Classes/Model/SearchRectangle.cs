@@ -1,9 +1,6 @@
 ﻿using ItemOrderDemonstration.Classes;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 
 namespace ItemsOrdersGenerator.Classes.Model
 {
@@ -23,8 +20,9 @@ namespace ItemsOrdersGenerator.Classes.Model
             NorthEastCorner = northEastCorner;
             SouthWestCorner = southWestCorner;
         }
+
         /// <summary>
-        /// СОздать объект класса из четырёх float значений
+        /// Создать объект класса из четырёх float значений
         /// </summary>
         /// <param name="NEX">Горизонтальная позиция (X) северо-восточной точки</param>
         /// <param name="NEY">Вертикальная позиция (Y) северо-восточной точки</param>
@@ -35,6 +33,7 @@ namespace ItemsOrdersGenerator.Classes.Model
             NorthEastCorner = new PointF(NEX, NEY);
             SouthWestCorner = new PointF(SWX, SWY);
         }
+
         /// <summary>
         /// Северо-восточная точка
         /// </summary>
@@ -42,6 +41,7 @@ namespace ItemsOrdersGenerator.Classes.Model
         [JsonProperty]
         [JsonConverter(typeof(PointFStringJsonConverter))]
         public PointF NorthEastCorner { get; set; }
+
         /// <summary>
         /// Юго-западная точка
         /// </summary>

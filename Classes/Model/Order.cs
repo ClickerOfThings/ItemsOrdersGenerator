@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace ItemsOrdersGenerator.Classes.Model
@@ -16,6 +14,7 @@ namespace ItemsOrdersGenerator.Classes.Model
         /// </summary>
         [XmlElement("retailPoint")]
         public RetailPoint RetailPoint { get; set; }
+
         /// <summary>
         /// Запросы в заказе
         /// </summary>

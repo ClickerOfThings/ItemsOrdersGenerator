@@ -21,10 +21,18 @@ namespace ItemOrderDemonstration.Classes
         /// Стандартное название выходного файла для товаров в формате XML
         /// </summary>
         private const string DEFAULT_ITEMS_OUTPUT_FILE = "items.xml";
+
         /// <summary>
         /// Стандартное название выходного файла для заказов в формате XML
         /// </summary>
         private const string DEFAULT_ORDERS_OUTPUT_FILE = "orders.xml";
+
+        /// <summary>
+        /// Сообщение, выводящееся пользователю, когда от него ожидается нажатие кнопки для подолжения
+        /// работы программы (обычно, для того, чтобы он успел что-то прочитать)
+        /// </summary>
+        const string INPUT_AWAIT_MSG = "Нажмите любую кнопку, чтобы продолжить...";
+
         /// <summary>
         /// Создать конфигурационный файл из пути, предоставленный пользователем, либо отказаться 
         /// от конфигурации в пользу ручного ввода
@@ -39,12 +47,14 @@ namespace ItemOrderDemonstration.Classes
             string configPath = string.Empty;
             Dictionary<string, string> charToConfigPath = new Dictionary<string, string>();
             string consoleInput;
+
             while (!isExitingFunction && resultConfig is null)
             {
                 Console.Clear();
 
                 StringBuilder allowedInput = new StringBuilder("? C S E Q");
                 charToConfigPath.Clear();
+
                 if (configFilesInAppFolder.Length == 0)
                     Console.WriteLine("В папке с приложением не найдено json/conf файлов.");
                 else
@@ -125,12 +135,12 @@ namespace ItemOrderDemonstration.Classes
                         configFilesInAppFolder = FolderHelper.GetConfigFilesInAppFolder();
                         break;
                 }
+
                 if (!string.IsNullOrEmpty(configPath))
                 {
                     try
                     {
                         resultConfig = Config.ReadFromFile(configPath);
-                        //isExitingFunction = true;
                     }
                     catch (Exception ex)
                     {
@@ -139,10 +149,10 @@ namespace ItemOrderDemonstration.Classes
                         WaitForInput();
                     }
                 }
-
             }
             return resultConfig;
         }
+
         /// <summary>
         /// Получить от пользователя путь к входному TXT файлу с товарами. Формат файла не проверяется
         /// </summary>
@@ -222,6 +232,7 @@ namespace ItemOrderDemonstration.Classes
             }
             return resultItemPath;
         }
+
         /// <summary>
         /// Получить входной и выходной пути файлов для создания файла с товарами
         /// </summary>
@@ -235,12 +246,14 @@ namespace ItemOrderDemonstration.Classes
 
             if (string.IsNullOrEmpty(inputItemsFilePath))
                 inputItemsFilePath = GetItemTxtPathFromUser();
+
             if (!File.Exists(inputItemsFilePath))
             {
                 Console.WriteLine("Указанный файл не найден.");
                 WaitForInput();
                 return;
             }
+
             if (string.IsNullOrEmpty(outputFilePath))
             {
                 Console.Write($"Введите название выходного файла (Enter для стандартного имени {DEFAULT_ITEMS_OUTPUT_FILE}): ");
@@ -249,6 +262,7 @@ namespace ItemOrderDemonstration.Classes
                     outputFilePath = DEFAULT_ITEMS_OUTPUT_FILE;
             }
         }
+
         /// <summary>
         /// Получить OSM объект от пользователя (город или прямоугольник)
         /// </summary>
@@ -329,6 +343,7 @@ namespace ItemOrderDemonstration.Classes
             }
             return foundCity;
         }
+
         /// <summary>
         /// Получить один город из списка городов от пользователя
         /// </summary>
@@ -359,6 +374,7 @@ namespace ItemOrderDemonstration.Classes
 
             return charToCity[GetInputFromConsole(allowedInput.ToString())];
         }
+
         /// <summary>
         /// Получить список типов мест от пользователя
         /// </summary>
@@ -430,6 +446,7 @@ namespace ItemOrderDemonstration.Classes
             }
             return resultTypes;
         }
+
         /// <summary>
         /// Получить список товаров от пользователя
         /// </summary>
@@ -528,6 +545,7 @@ namespace ItemOrderDemonstration.Classes
             }
             return resultItemsList;
         }
+
         /// <summary>
         /// Получить поля для случайной генерации от пользователя
         /// </summary>
@@ -617,42 +635,49 @@ namespace ItemOrderDemonstration.Classes
                         Console.WriteLine("Минимальное и максимальное количество временных окон");
                         minMaxWindows = GetIntMinMax(min: 1);
                     }
+
                     if (timespanFromTo is null)
                     {
                         Console.Clear();
                         Console.WriteLine("Минимальное и максимальное время (от и до) во временном окне");
                         timespanFromTo = GetMinMaxHMTime();
                     }
+
                     if (configIntervalBetweenFromTo is null)
                     {
                         Console.Clear();
                         Console.WriteLine("Интервал между минимальным и максимальным временем (от и до)");
                         intervalBetweenFromTo = GetHMTimeFromConsole();
                     }
+
                     if (!Demand.CheckIfIntervalMeetsRange(timespanFromTo.Item1, timespanFromTo.Item2,
                         intervalBetweenFromTo, minMaxWindows.Item2))
                         throw new BadIntervalException(timespanFromTo.Item1, timespanFromTo.Item2,
                             intervalBetweenFromTo, minMaxWindows.Item2);
+
                     break;
                 }
                 catch (BadIntervalException ex)
                 {
                     if (Program.CurrentConfig != null)
                         throw new BadConfigException(ex.Message);
+
                     Console.WriteLine(ex.Message);
                     Console.WriteLine("Введите данные заново.");
                     WaitForInput();
+
                     goto MinsMaxStart; // считываем значения снова, заместо выставления переменных в null как ниже
                     //minMaxWindows = null; timespanFromTo = null; intervalBetweenFromTo = TimeSpan.MinValue;
                 }
-
             }
+
             if (itemsPerWindow is null)
             {
                 Console.Clear();
                 Console.WriteLine("Минимальное и максимальное количество товаров на временное окно");
                 itemsPerWindow = GetIntMinMax(1, maxItems);
             }
+
             if (itemsCountPerPosition is null)
             {
                 Console.Clear();
@@ -660,6 +685,7 @@ namespace ItemOrderDemonstration.Classes
                 itemsCountPerPosition = GetIntMinMax(1);
             }
         }
+
         /// <summary>
         /// Получить дату от пользователя (день, месяц, год) с форматированием операционной системы
         /// </summary>
@@ -682,8 +708,10 @@ namespace ItemOrderDemonstration.Classes
                 Console.Write(">");
             } while (!ParseHelper.TryParseDateTimeFromSystemCulture(Console.ReadLine(), out returnDate) ||
                     returnDate.TimeOfDay != TimeSpan.Zero);
+
             return returnDate;
         }
+
         /// <summary>
         /// Получить путь выходного файла для заказов от пользователя
         /// </summary>
@@ -700,9 +728,7 @@ namespace ItemOrderDemonstration.Classes
             }
         }
 
-
         #region Tech Methods
-
         /// <summary>
         /// Ввод с консоли только разрешённых строк
         /// </summary>
@@ -713,6 +739,7 @@ namespace ItemOrderDemonstration.Classes
         {
             return GetInputFromConsole(allowedInputs.Trim().Split(" "));
         }
+
         /// <summary>
         /// Ввод с консоли только разрешённых строк
         /// </summary>
@@ -740,7 +767,7 @@ namespace ItemOrderDemonstration.Classes
             } while (!allowedInputs.Contains(consoleInput));
             return consoleInput;
         }
-        const string INPUT_AWAIT_MSG = "Нажмите любую кнопку, чтобы продолжить...";
+        
         /// <summary>
         /// Остановить вывод консоли, пока пользователь не нажмёт любую кнопку
         /// </summary>
@@ -749,6 +776,7 @@ namespace ItemOrderDemonstration.Classes
             Console.WriteLine(INPUT_AWAIT_MSG);
             Console.ReadKey();
         }
+
         /// <summary>
         /// Получить от пользователя координаты двух точек - северо-восточную и юго-западную
         /// </summary>
@@ -763,10 +791,12 @@ namespace ItemOrderDemonstration.Classes
                             "(45.1234, 45.4321) - точка северо-восточного угла, в последующем ожидается " +
                             "точка юго-западного угла;\n" +
                             "(45.1234, 45.4321, 40.1234, 40.4321) - точка северо-восточного и юго-западного угла.");
+
             string consoleInput = Console.ReadLine();
             string[] coordinatesStringArr = consoleInput.Replace(", ", ",").Split(",");
             float nX = -1, nY = -1, sX = -1, sY = -1;
             bool success = true;
+
             if (coordinatesStringArr.Length == 4)
             {
                 success = float.TryParse(coordinatesStringArr[0], out nX) &&
@@ -778,14 +808,17 @@ namespace ItemOrderDemonstration.Classes
             {
                 success = float.TryParse(coordinatesStringArr[0], out nX);
                 success = success is true && float.TryParse(coordinatesStringArr[1], out nY);
+
                 if (success is false)
                     goto coordinatesEnd;
+
                 do
                 {
                     Console.Write("Введите координаты юго-западного угла: ");
                     consoleInput = Console.ReadLine();
                     coordinatesStringArr = consoleInput.Replace(", ", ",").Split(",");
                 } while (coordinatesStringArr.Length != 2);
+
                 success = float.TryParse(coordinatesStringArr[0], out sX);
                 success = success is true && float.TryParse(coordinatesStringArr[1], out sY);
             }
@@ -800,10 +833,12 @@ namespace ItemOrderDemonstration.Classes
         coordinatesEnd:
             northEast = new PointF(nX, nY);
             southWest = new PointF(sX, sY);
+
             if (northEast.CompareTo(southWest) == -1)
                 return false;
             return success;
         }
+
         /// <summary>
         /// Получить одно значение координаты от пользователя
         /// </summary>
@@ -817,6 +852,7 @@ namespace ItemOrderDemonstration.Classes
                 $"{(isNorthEast ? "северо-восточного" : "юго-западного")} угла: ");
             return float.TryParse(Console.ReadLine(), out parsedResult);
         }
+
         /// <summary>
         /// Получить переменную типа <see cref="int"/> от пользователя
         /// </summary>
@@ -825,6 +861,7 @@ namespace ItemOrderDemonstration.Classes
         {
             int result;
             string consoleInput;
+
             do
             {
                 Console.Write(">");
@@ -832,6 +869,7 @@ namespace ItemOrderDemonstration.Classes
             } while (!int.TryParse(consoleInput, out result));
             return result;
         }
+
         /// <summary>
         /// Получить переменную типа <see cref="double"/> от пользователя
         /// </summary>
@@ -840,6 +878,7 @@ namespace ItemOrderDemonstration.Classes
         {
             double result;
             string consoleInput;
+
             do
             {
                 Console.Write(">");
@@ -847,6 +886,7 @@ namespace ItemOrderDemonstration.Classes
             } while (!double.TryParse(consoleInput, out result));
             return result;
         }
+
         /// <summary>
         /// Получить переменную типа <see cref="float"/> от пользователя
         /// </summary>
@@ -855,6 +895,7 @@ namespace ItemOrderDemonstration.Classes
         {
             float result;
             string consoleInput;
+
             do
             {
                 Console.Write(">");
@@ -862,6 +903,7 @@ namespace ItemOrderDemonstration.Classes
             } while (!float.TryParse(consoleInput, out result));
             return result;
         }
+
         /// <summary>
         /// Получить переменную типа <see cref="int"/> от пользователя в указанном диапазоне
         /// </summary>
@@ -871,6 +913,7 @@ namespace ItemOrderDemonstration.Classes
         public static int GetIntInRange(int? rangeFrom = null, int? rangeTo = null)
         {
             int result;
+
             do
             {
                 Console.Write(">");
@@ -879,6 +922,7 @@ namespace ItemOrderDemonstration.Classes
                 (rangeTo.HasValue && result > rangeTo.Value)));
             return result;
         }
+
         /// <summary>
         /// Получить кортеж минимального и максимального значения от пользователя (доступен ввод в диапазоне)
         /// </summary>
@@ -889,17 +933,21 @@ namespace ItemOrderDemonstration.Classes
         public static Tuple<int, int> GetIntMinMax(int? min = null, int? max = null)
         {
             int newMin, newMax;
+
             Console.WriteLine("Введите МИНИМУМ" +
                 (min.HasValue ? " от " + min.Value : "") +
                 (max.HasValue ? " до " + max.Value : ""));
             newMin = GetIntInRange(min, max);
+
             min = min.HasValue ? (newMin > min.Value ? newMin : min.Value) : newMin;
             Console.WriteLine("Введите МАКСИМУМ" +
                 (" от " + min) +
                 (max.HasValue ? " до " + max.Value : ""));
             newMax = GetIntInRange(min, max);
+
             return new Tuple<int, int>(newMin, newMax);
         }
+
         /// <summary>
         /// Получить час и минуту от пользователя (с возможностью указать 24:00)
         /// </summary>
@@ -907,8 +955,9 @@ namespace ItemOrderDemonstration.Classes
         public static TimeSpan GetHMTimeFromConsole()
         {
             TimeSpan result;
-            Console.WriteLine("Введите время в формате чч:мм");
             string timeString;
+
+            Console.WriteLine("Введите время в формате чч:мм");
             do
             {
                 Console.Write(">");
@@ -918,9 +967,10 @@ namespace ItemOrderDemonstration.Classes
             } while (!timeString.Contains(":")
             || !TimeSpan.TryParse(timeString, out result)
             || result < TimeSpan.Zero);
-            //result = exampleConfig TimeSpan(result.Hours, result.Minutes, 0);
+
             return result;
         }
+
         /// <summary>
         /// Получить минимум и ммксимум времени от пользователя
         /// </summary>
@@ -929,12 +979,14 @@ namespace ItemOrderDemonstration.Classes
         {
             Console.WriteLine("Минимум времени");
             TimeSpan from = GetHMTimeFromConsole();
+
             TimeSpan to;
             do
             {
                 Console.WriteLine("Максимум времени (не должно быть меньше минимума)");
                 to = GetHMTimeFromConsole();
             } while (to < from);
+
             return new Tuple<TimeSpan, TimeSpan>(from, to);
         }
         #endregion

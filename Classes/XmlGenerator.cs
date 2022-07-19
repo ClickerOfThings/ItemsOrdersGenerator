@@ -32,6 +32,7 @@ namespace ItemOrderDemonstration.Classes
             ns.Add("", ""); // убираем лишние неймспейсы
             serializer.Serialize(writer, itemsToSerialize, ns);
         }
+
         /// <summary>
         /// Десериализовать XML файл с товарами
         /// </summary>
@@ -71,10 +72,12 @@ namespace ItemOrderDemonstration.Classes
             using FileStream writer = File.Create(ordersFileName);
             XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
             ns.Add("", ""); // убираем лишние неймспейсы
+
             OrdersListView orders = new OrdersListView()
             {
                 DateOfOrders = ordersDateTime
             };
+
             for (int i = 0; i < pointsCount; i++)
             {
                 Order newOrder = new Order
@@ -89,14 +92,17 @@ namespace ItemOrderDemonstration.Classes
                             Longitude = listOfPoints[i].Longitude,
                             Latitude = listOfPoints[i].Latitude
                         }
-                    }
+                    },
+                    Demands = new List<Demand>()
                 };
-                newOrder.Demands = new List<Demand>();
+
                 int demandWindowsCount = GeneralHelper.rand.Next(minMaxTimeWindows.Item1, minMaxTimeWindows.Item2 + 1);
                 int itemsPerWindowCount = GeneralHelper.rand.Next(minMaxItemsPerWindow.Item1, minMaxItemsPerWindow.Item2 + 1);
+
                 IEnumerable<Tuple<TimeSpan, TimeSpan>> timespansEnumerable =
                     Demand.RandomTimespans(GeneralHelper.rand, timespanFromTo.Item1, timespanFromTo.Item2,
                     intervalBetweenFromTo, demandWindowsCount);
+
                 foreach (Tuple<TimeSpan, TimeSpan> tupleFromTo in
                     timespansEnumerable)
                 {

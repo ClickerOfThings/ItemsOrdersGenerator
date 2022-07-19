@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ItemsOrdersGenerator.Classes.Helpers
 {
@@ -22,6 +20,7 @@ namespace ItemsOrdersGenerator.Classes.Helpers
                         System.Globalization.DateTimeStyles.None,
                         out result);
         }
+
         /// <summary>
         /// Спарсить объект класса <see cref="DateTime"/> с форматированием ОС пользователя
         /// </summary>

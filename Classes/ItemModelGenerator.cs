@@ -23,25 +23,28 @@ namespace ItemOrderDemonstration.Classes
         /// </remarks>
         public static List<Item> ParseTxtItemsIntoList(string txtFilePath)
         {
-            List<Item> resultList = new List<Item>();
+            List<Item> parsedItems = new List<Item>();
             using StreamReader reader = new StreamReader(txtFilePath);
+
             int errorLineNum = 0; // для вывода строки, в которой произошла ошибка
             while (!reader.EndOfStream)
             {
                 errorLineNum++;
                 string currentLine = reader.ReadLine().Replace("; ", ";");
                 var variables = currentLine.Split(';');
+
                 try
                 {
                     if (variables.Length != 3)
                         throw new ArgumentException();
-                    Item newItem = StringsToSku(variables);
-                    resultList.Add(newItem);
+                    Item parsedItem = StringsToSku(variables);
+                    parsedItems.Add(parsedItem);
                 }
                 catch(Exception ex)
                 {
                     ConsoleColor defaultForegroundColor = Console.ForegroundColor;
                     Console.ForegroundColor = ConsoleColor.Red;
+
                     if (ex is FormatException || ex is OverflowException)
                     {
                         throw new ArgumentException("Неправильный формат числа, либо слишком большое/маленькое число, " +
@@ -52,10 +55,11 @@ namespace ItemOrderDemonstration.Classes
                         Console.ForegroundColor = defaultForegroundColor;
                         throw new ArgumentException("Количество переменных не равно 3, строка " + errorLineNum);
                     }
+
                     Console.ForegroundColor = defaultForegroundColor;
                 }
             }
-            return resultList;
+            return parsedItems;
         }
 
         /// <summary>
@@ -65,16 +69,18 @@ namespace ItemOrderDemonstration.Classes
         /// <returns>Обработанный объект товара</returns>
         private static Item StringsToSku(string[] inputStrings)
         {
-            // приводим вес к нужному формату
+            // приводим вес к нужному формату числа с точкой
             inputStrings[2] = inputStrings[2].Replace(",", ".");
-            Item return_item = new Item()
+
+            Item parsedItem = new Item()
             {
                 Id = Guid.NewGuid(),
                 Name = inputStrings[0],
                 AmountPerTray = int.Parse(inputStrings[1]),
                 Weight = float.Parse(inputStrings[2], style: System.Globalization.NumberStyles.Any)
             };
-            return return_item;
+
+            return parsedItem;
         }
     }
 }

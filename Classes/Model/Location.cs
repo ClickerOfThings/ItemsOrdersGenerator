@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace ItemsOrdersGenerator.Classes.Model
 {
@@ -16,6 +13,7 @@ namespace ItemsOrdersGenerator.Classes.Model
         /// </summary>
         [XmlElement("latitude")]
         public double Latitude { get; set; }
+
         /// <summary>
         /// Долгота позиции
         /// </summary>

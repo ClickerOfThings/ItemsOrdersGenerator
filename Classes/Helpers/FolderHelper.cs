@@ -17,12 +17,14 @@ namespace ItemsOrdersGenerator.Classes.Helpers
         /// <returns>Пути всех файлов с расширением .txt</returns>
         public static string[] GetTxtFilesInAppFolder() =>
             System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory(), "*.txt");
+
         /// <summary>
         /// Извлечь пути всех файлов с расширениями .conf и .json в директории приложения
         /// </summary>
         /// <returns>Пути всех файлов с расширениями .conf и .json</returns>
         public static string[] GetConfigFilesInAppFolder() =>
             GetFilesWithWildcard("*.conf").Concat(GetFilesWithWildcard("*.json")).ToArray();
+
         /// <summary>
         /// Излечь пути всех файлов с определённым wildcard-ом в директории приложения
         /// </summary>
@@ -30,6 +32,7 @@ namespace ItemsOrdersGenerator.Classes.Helpers
         /// <returns>Пути всех файлов по wildcard-у</returns>
         public static string[] GetFilesWithWildcard(string wildcard) =>
             System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory(), wildcard);
+
         /// <summary>
         /// Излечь пути всех файлов с расширением .xml, 
         /// которые успешно десериализируются в объект класса <see cref="Item"/>
@@ -38,13 +41,14 @@ namespace ItemsOrdersGenerator.Classes.Helpers
         public static Dictionary<string, List<Item>> GetItemXmlFilesInAppFolder()
         {
             string[] itemsFiles = System.IO.Directory.GetFiles(System.IO.Directory.GetCurrentDirectory(), "*.xml");
+
             Dictionary<string, List<Item>> resultDictionary = new Dictionary<string, List<Item>>();
             foreach (string itemFile in itemsFiles)
             {
                 try
                 {
-                    List<Item> tempList = XmlGenerator.DeserializeItemsFromFileToList(itemFile);
-                    resultDictionary.Add(itemFile, tempList);
+                    List<Item> deserializedItems = XmlGenerator.DeserializeItemsFromFileToList(itemFile);
+                    resultDictionary.Add(itemFile, deserializedItems);
                 }
                 catch (Exception)
                 {

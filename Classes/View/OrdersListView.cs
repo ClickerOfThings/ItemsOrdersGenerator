@@ -1,7 +1,6 @@
 ﻿using ItemsOrdersGenerator.Classes.Model;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace ItemsOrdersGenerator.Classes.View
@@ -17,10 +16,10 @@ namespace ItemsOrdersGenerator.Classes.View
         /// </summary>
         [XmlIgnore]
         public DateTime DateOfOrders;
+
         /// <summary>
         /// View-свойство объекта <see cref="DateOfOrders"/>, который сериализируется с форматированием
         /// </summary>
-        
         [XmlAttribute("date")]
         public string DateOfOrdersView
         {
@@ -33,6 +32,7 @@ namespace ItemsOrdersGenerator.Classes.View
                 DateOfOrders = Helpers.ParseHelper.ParseDateTimeFromSystemCulture(value);
             }
         }
+
         /// <summary>
         /// Список заказов
         /// </summary>

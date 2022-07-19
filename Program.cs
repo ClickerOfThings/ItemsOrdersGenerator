@@ -1,28 +1,26 @@
 ﻿//#define DISABLE_CATCH_ALL_EXCEPTIONS
 
+using ItemOrderDemonstration.Classes;
+using ItemsOrdersGenerator.Classes.Model;
+using OverpassLibrary;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Text;
 using System.Threading;
-using System.Xml;
-using System.Xml.Serialization;
-
-using ItemOrderDemonstration.Classes;
-
-using OverpassLibrary;
-
-using System.Linq;
-using Newtonsoft.Json;
-using ItemsOrdersGenerator.Classes.Model;
 
 namespace ItemOrderDemonstration
 {
     internal class Program
     {
+        /// <summary>
+        /// Формат времени, используемый во многих файлах, с которыми работает программа
+        /// </summary>
         public const string TIME_FORMAT = @"hh\:mm";
+
+        /// <summary>
+        /// Текущий конфигурационный файл, используемый в программе
+        /// </summary>
         public static Config CurrentConfig { get; set; }
+
         static void Main(string[] args)
         {
             // для разделителей decimal и float чисел в едином формате
@@ -62,6 +60,7 @@ namespace ItemOrderDemonstration
                             break;
                         case "C":
                             Config newLoadedConfig;
+
                             try
                             {
                                 newLoadedConfig = ConsoleInput.GetConfigFile();
@@ -70,13 +69,15 @@ namespace ItemOrderDemonstration
                             {
                                 throw new BadConfigException(ex.Message);
                             }
+
                             if (newLoadedConfig is null)
                             {
                                 Console.WriteLine("Конфигурационный файл не был загружен. Вы хотите " +
                                     "работать без загруженной ранее конфигурации [Y], или оставить " +
                                     "ранее загруженную конфигурацию? [N]");
-                                string confInput = ConsoleInput.GetInputFromConsole("Y N");
-                                switch (confInput)
+
+                                string configChoice = ConsoleInput.GetInputFromConsole("Y N");
+                                switch (configChoice)
                                 {
                                     case "Y":
                                         CurrentConfig = null;
@@ -84,6 +85,7 @@ namespace ItemOrderDemonstration
                                             "данные будут вводиться вручную.");
                                         break;
                                 }
+
                                 ConsoleInput.WaitForInput();
                             }
                             else
@@ -110,6 +112,9 @@ namespace ItemOrderDemonstration
             return;
         }
 
+        /// <summary>
+        /// Создание файла с товарами
+        /// </summary>
         private static void CreateItemsFile()
         {
             ConsoleInput.GetItemFilesPathsFromUser(out string inputItemsFilePath, out string outputFilePath);
@@ -128,6 +133,9 @@ namespace ItemOrderDemonstration
             ConsoleInput.WaitForInput();
         }
 
+        /// <summary>
+        /// Создание файла с заказами
+        /// </summary>
         private static void CreateOrdersFile()
         {
             OsmClass foundObj = ConsoleInput.GetOsmObjectFromUser();
@@ -200,6 +208,7 @@ namespace ItemOrderDemonstration
                 Console.WriteLine("При создании файла возникла ошибка: " + ex.Message);
                 Console.ForegroundColor = previousConsoleColor;
             }
+
             ConsoleInput.WaitForInput();
         }
     }

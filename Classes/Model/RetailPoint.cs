@@ -2,9 +2,6 @@
 //#define RETAIL_REGULAR_ID
 
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace ItemsOrdersGenerator.Classes.Model
@@ -29,16 +26,19 @@ namespace ItemsOrdersGenerator.Classes.Model
         [XmlAttribute(AttributeName = "id")]
         public Guid Id { get; set; }
 #endif
+
         /// <summary>
         /// Наименование точки
         /// </summary>
         [XmlElement("name")]
         public string Name { get; set; }
+
         /// <summary>
         /// Полный адрес точки
         /// </summary>
         [XmlElement("address")]
         public string Address { get; set; }
+
         /// <summary>
         /// Позиция точки на карте в виде координат
         /// </summary>
