@@ -764,50 +764,37 @@ namespace ItemOrderDemonstration.Classes
                             "точка юго-западного угла;\n" +
                             "(45.1234, 45.4321, 40.1234, 40.4321) - точка северо-восточного и юго-западного угла.");
             string consoleInput = Console.ReadLine();
-            string[] coords = consoleInput.Replace(", ", ",").Split(",");
+            string[] coordinatesStringArr = consoleInput.Replace(", ", ",").Split(",");
             float nX = -1, nY = -1, sX = -1, sY = -1;
             bool success = true;
-            if (coords.Length == 4)
+            if (coordinatesStringArr.Length == 4)
             {
-                success = float.TryParse(coords[0], out nX);
-                success = success is true ? float.TryParse(coords[1], out nY) : false;
-                success = success is true ? float.TryParse(coords[2], out sX) : false;
-                success = success is true ? float.TryParse(coords[3], out sY) : false;
+                success = float.TryParse(coordinatesStringArr[0], out nX) &&
+                          float.TryParse(coordinatesStringArr[1], out nY) &&
+                          float.TryParse(coordinatesStringArr[2], out sX) &&
+                          float.TryParse(coordinatesStringArr[3], out sY);
             }
-            else if (coords.Length == 2)
+            else if (coordinatesStringArr.Length == 2)
             {
-                success = float.TryParse(coords[0], out nX);
-                success = success is true ? float.TryParse(coords[1], out nY) : false;
+                success = float.TryParse(coordinatesStringArr[0], out nX);
+                success = success is true && float.TryParse(coordinatesStringArr[1], out nY);
                 if (success is false)
                     goto coordinatesEnd;
-                Console.Write("Введите координаты юго-западного угла: ");
-                consoleInput = Console.ReadLine();
-                coords = consoleInput.Replace(", ", ",").Split(",");
-                if (coords.Length == 2)
+                do
                 {
-                    success = float.TryParse(coords[0], out sX);
-                    success = success is true ? float.TryParse(coords[1], out sY) : false;
-                }
+                    Console.Write("Введите координаты юго-западного угла: ");
+                    consoleInput = Console.ReadLine();
+                    coordinatesStringArr = consoleInput.Replace(", ", ",").Split(",");
+                } while (coordinatesStringArr.Length != 2);
+                success = float.TryParse(coordinatesStringArr[0], out sX);
+                success = success is true && float.TryParse(coordinatesStringArr[1], out sY);
             }
             else
             {
-                success = float.TryParse(consoleInput, out nX);
-                if (success is false)
-                    goto coordinatesEnd;
-                Console.Write("Введите Y - координату северо-восточного угла: ");
-                consoleInput = Console.ReadLine();
-                success = float.TryParse(consoleInput, out nY);
-                if (success is false)
-                    goto coordinatesEnd;
-                Console.Write("Введите X - координату юго-западного угла: ");
-                consoleInput = Console.ReadLine();
-                success = float.TryParse(consoleInput, out sX);
-                if (success is false)
-                    goto coordinatesEnd;
-                Console.Write("Введите Y - координату юго-западного угла: ");
-                consoleInput = Console.ReadLine();
-                success = float.TryParse(consoleInput, out sY);
-                if (success is false)
+                if (GetOneCoordinate(true, true, out nX) ||
+                    GetOneCoordinate(false, true, out nY) ||
+                    GetOneCoordinate(true, false, out sX) ||
+                    GetOneCoordinate(false, false, out sY))
                     goto coordinatesEnd;
             }
         coordinatesEnd:
@@ -816,6 +803,19 @@ namespace ItemOrderDemonstration.Classes
             if (northEast.CompareTo(southWest) == -1)
                 return false;
             return success;
+        }
+        /// <summary>
+        /// Получить одно значение координаты от пользователя
+        /// </summary>
+        /// <param name="isX">Является ли координата x-координатой</param>
+        /// <param name="isNorthEast">Является ли координата северно-восточным углом</param>
+        /// <param name="parsedResult">Выходная координата, если удалось спарсить</param>
+        /// <returns>true если удалось спарсить, false если не удалось</returns>
+        private static bool GetOneCoordinate(bool isX, bool isNorthEast, out float parsedResult)
+        {
+            Console.Write($"Введите {(isX ? "X" : "Y")} - координату " +
+                $"{(isNorthEast ? "северо-восточного" : "юго-западного")} угла: ");
+            return float.TryParse(Console.ReadLine(), out parsedResult);
         }
         /// <summary>
         /// Получить переменную типа <see cref="int"/> от пользователя

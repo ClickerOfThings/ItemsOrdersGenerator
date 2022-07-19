@@ -49,8 +49,7 @@ namespace ItemOrderDemonstration.Classes
                     continue;
                 foreach (Attribute attribute in property.GetCustomAttributes())
                 {
-                    IPropertyValidation validation = attribute as IPropertyValidation;
-                    if (validation != null)
+                    if (attribute is IPropertyValidation validation)
                     {
                         if (!validation.ValidateProperty(property.GetValue(resultConfig)))
                         {
@@ -69,11 +68,9 @@ namespace ItemOrderDemonstration.Classes
         public void WriteIntoJson(string filePath)
         {
             JsonSerializer serializer = JsonSerializer.Create();
-            using (StreamWriter writer = new StreamWriter(File.Create(filePath)))
-            using (JsonTextWriter Jwriter = new JsonTextWriter(writer) { Formatting = Newtonsoft.Json.Formatting.Indented })
-            {
-                serializer.Serialize(Jwriter, this);
-            }
+            using StreamWriter writer = new StreamWriter(File.Create(filePath));
+            using JsonTextWriter Jwriter = new JsonTextWriter(writer) { Formatting = Newtonsoft.Json.Formatting.Indented };
+            serializer.Serialize(Jwriter, this);
         }
 
         #region ORDERS Configuration Properties
@@ -243,9 +240,11 @@ namespace ItemOrderDemonstration.Classes
             if (!(value as PointF?).HasValue)
                 return;
             PointF point = (value as PointF?).Value;
-            JObject resultPointJObj = new JObject();
-            resultPointJObj.Add("X", point.X);
-            resultPointJObj.Add("Y", point.Y);
+            JObject resultPointJObj = new JObject
+            {
+                { "X", point.X },
+                { "Y", point.Y }
+            };
             resultPointJObj.WriteTo(writer);
             return;
         }
@@ -283,9 +282,11 @@ namespace ItemOrderDemonstration.Classes
             Tuple<TimeSpan, TimeSpan> tuple = value as Tuple<TimeSpan, TimeSpan>;
             if (tuple is null)
                 writer.WriteNull();
-            JObject resultTupleJObj = new JObject();
-            resultTupleJObj.Add("From", tuple.Item1.ToString(Program.TIME_FORMAT));
-            resultTupleJObj.Add("To", tuple.Item2.Days == 1 ? "24:00" : tuple.Item2.ToString(Program.TIME_FORMAT));
+            JObject resultTupleJObj = new JObject
+            {
+                { "From", tuple.Item1.ToString(Program.TIME_FORMAT) },
+                { "To", tuple.Item2.Days == 1 ? "24:00" : tuple.Item2.ToString(Program.TIME_FORMAT) }
+            };
             resultTupleJObj.WriteTo(writer);
             return;
         }
@@ -318,7 +319,7 @@ namespace ItemOrderDemonstration.Classes
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CheckNumberForMin : Attribute, IPropertyValidation
     {
-        private int minRequired;
+        private readonly int minRequired;
         public string ErrorMessage { get => "Число меньше " + minRequired; }
         public CheckNumberForMin(int minRequired)
         {
@@ -338,7 +339,7 @@ namespace ItemOrderDemonstration.Classes
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CheckIntTupleForMin : Attribute, IPropertyValidation
     {
-        private int minRequired;
+        private readonly int minRequired;
         public string ErrorMessage { get => "Одно из чисел меньше " + minRequired; }
         public CheckIntTupleForMin(int minRequired)
         {
@@ -361,7 +362,7 @@ namespace ItemOrderDemonstration.Classes
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CheckTimeSpanForMin : Attribute, IPropertyValidation
     {
-        private TimeSpan minRequired;
+        private readonly TimeSpan minRequired;
         public string ErrorMessage { get => "Указанное время меньше " + minRequired; }
         public CheckTimeSpanForMin(int minHours, int minMinutes)
         {
@@ -381,7 +382,7 @@ namespace ItemOrderDemonstration.Classes
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class CheckTimeSpanTupleForMin : Attribute, IPropertyValidation
     {
-        private TimeSpan minRequired;
+        private readonly TimeSpan minRequired;
         public string ErrorMessage { get => "Одно из указанных времён меньше " + minRequired; }
         public CheckTimeSpanTupleForMin(int minHours, int minMinutes)
         {
