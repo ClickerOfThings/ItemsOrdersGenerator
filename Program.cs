@@ -12,7 +12,7 @@ namespace ItemOrderDemonstration
     internal class Program
     {
         /// <summary>
-        /// Формат времени, используемый во многих файлах, с которыми работает программа
+        /// Формат времени, используемый во многих файлах и методах, с которыми работает программа
         /// </summary>
         public const string TIME_FORMAT = @"hh\:mm";
 
@@ -38,11 +38,11 @@ namespace ItemOrderDemonstration
             do
             {
                 Console.Clear();
-                Console.WriteLine("Выбор - нажатием нужной клавиши в квадратных скобках, затем нажатием Enter.");
-                Console.WriteLine("\n");
-                Console.WriteLine("Сгенерировать: [1] - файл товаров, [2] - файл заказов, [3] - оба файла.");
-                Console.WriteLine("[C] для загрузки нового конфигурационного файла.");
-                Console.WriteLine("[Q] для выхода.");
+                Console.WriteLine("Выбор - нажатием нужной клавиши в квадратных скобках, затем нажатием Enter.\n\n" +
+                    "Сгенерировать: [1] - файл товаров, [2] - файл заказов, [3] - оба файла.\n" +
+                    "[C] для загрузки нового конфигурационного файла.\n" +
+                    "[Q] для выхода.");
+
                 consoleInput = ConsoleInput.GetInputFromConsole("1 2 3 C Q");
                 try
                 {
