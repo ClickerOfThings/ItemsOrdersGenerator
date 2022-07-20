@@ -1,7 +1,9 @@
-﻿//#define DISABLE_CATCH_ALL_EXCEPTIONS
+﻿#define DISABLE_CATCH_ALL_EXCEPTIONS
 
-using ItemOrderDemonstration.Classes;
-using ItemsOrdersGenerator.Classes.Model;
+using ItemsOrdersGenerator;
+using ItemsOrdersGenerator.Exceptions;
+using ItemsOrdersGenerator.Generators;
+using ItemsOrdersGenerator.Model;
 using OverpassLibrary;
 using System;
 using System.Collections.Generic;
@@ -174,7 +176,7 @@ namespace ItemOrderDemonstration
             DateTime ordersDateTime = ConsoleInput.GetDateFromUser();
             Console.Clear();
 
-            ConsoleInput.GetValuesForRandomFromUser(foundPointsList.Count, foundItemsList.Count,
+            ConsoleInput.GetVariablesForRandomFromUser(foundPointsList.Count, foundItemsList.Count,
                 out int pointsCount,
                 out Tuple<int, int> windows,
                 out Tuple<int, int> itemsPerWindow,
@@ -201,13 +203,13 @@ namespace ItemOrderDemonstration
                 Console.WriteLine("При создании файла возникла ошибка интервала: " + ex.Message);
                 Console.ForegroundColor = previousConsoleColor;
             }
-            catch (Exception ex)
+            /*catch (Exception ex)
             {
                 var previousConsoleColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("При создании файла возникла ошибка: " + ex.Message);
                 Console.ForegroundColor = previousConsoleColor;
-            }
+            }*/
 
             ConsoleInput.WaitForInput();
         }
