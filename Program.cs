@@ -1,4 +1,4 @@
-﻿#define DISABLE_CATCH_ALL_EXCEPTIONS
+﻿//#define DISABLE_CATCH_ALL_EXCEPTIONS
 
 using ItemsOrdersGenerator;
 using ItemsOrdersGenerator.Exceptions;
