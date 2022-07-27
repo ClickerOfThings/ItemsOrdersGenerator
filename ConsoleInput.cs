@@ -195,7 +195,7 @@ namespace ItemsOrdersGenerator
                 Console.WriteLine("Выбор типа продукции\n" +
                         "[?] для помощи по формату файла,\n" +
                         "[C] для ручного ввода пути к файлу,\n" +
-                        "[S] чтобы снова сканировать папку." +
+                        "[S] чтобы снова сканировать папку.\n" +
                         "[Q] - назад в меню.");
                 consoleInput = GetInputFromConsole(allowedInput.ToString());
                 switch (consoleInput)
@@ -250,6 +250,9 @@ namespace ItemsOrdersGenerator
 
             if (string.IsNullOrEmpty(inputItemsFilePath))
                 inputItemsFilePath = GetItemTxtPathFromUser();
+
+            if (string.IsNullOrEmpty(inputItemsFilePath))
+                return;
 
             if (!File.Exists(inputItemsFilePath))
             {
