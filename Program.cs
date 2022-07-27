@@ -203,13 +203,13 @@ namespace ItemOrderDemonstration
                 Console.WriteLine("При создании файла возникла ошибка интервала: " + ex.Message);
                 Console.ForegroundColor = previousConsoleColor;
             }
-            /*catch (Exception ex)
+            catch (Exception ex)
             {
                 var previousConsoleColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("При создании файла возникла ошибка: " + ex.Message);
                 Console.ForegroundColor = previousConsoleColor;
-            }*/
+            }
 
             ConsoleInput.WaitForInput();
         }

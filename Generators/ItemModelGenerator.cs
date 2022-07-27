@@ -25,7 +25,7 @@ namespace ItemsOrdersGenerator.Generators
             List<Item> parsedItems = new List<Item>();
             using StreamReader reader = new StreamReader(txtFilePath);
 
-            int errorLineNum = 0; // для вывода строки, в которой произошла ошибка
+            int errorLineNum = 0; // для вывода строки, в которой произошла ошибка парсинга
             while (!reader.EndOfStream)
             {
                 errorLineNum++;
