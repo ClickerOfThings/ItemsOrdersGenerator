@@ -596,7 +596,7 @@ namespace ItemsOrdersGenerator
 
             itemsPerWindow = Program.CurrentConfig?.MinMaxItemsPerWindow;
             if (itemsPerWindow != null)
-                if (itemsPerWindow.Item1 > minMaxWindows.Item2)
+                if (itemsPerWindow.Item1 > itemsPerWindow.Item2)
                     throw new BadConfigException("Минимальное количество товаров на окно (" + itemsPerWindow.Item1 + ") " +
                         "больше максимального количества (" + itemsPerWindow.Item2 + ")");
                 else if (itemsPerWindow.Item2 > maxItems)
