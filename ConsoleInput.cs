@@ -629,7 +629,6 @@ namespace ItemsOrdersGenerator
                 intervalBetweenFromTo = TimeSpan.MinValue;
             #endregion
 
-            Console.WriteLine("Ввод данных для случайной генерации");
             if (configPoints is null)
             {
                 Console.WriteLine("Введите количество точек (максимум " + maxPoints + " точек включительно)");
@@ -637,11 +636,11 @@ namespace ItemsOrdersGenerator
             }
             while (true)
             {
+                Console.WriteLine("Ввод данных для случайной генерации");
                 try
                 {
                     if (minMaxWindows is null)
                     {
-                        Console.Clear();
                         Console.WriteLine("Минимальное и максимальное количество временных окон");
                         minMaxWindows = GetIntMinMax(min: 1);
                     }
