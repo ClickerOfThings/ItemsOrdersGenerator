@@ -120,6 +120,8 @@ namespace ItemOrderDemonstration
         private static void CreateItemsFile()
         {
             ConsoleInput.GetItemFilesPathsFromUser(out string inputItemsFilePath, out string outputFilePath);
+            if (string.IsNullOrEmpty(inputItemsFilePath) || string.IsNullOrEmpty(outputFilePath))
+                return;
 
             try
             {
