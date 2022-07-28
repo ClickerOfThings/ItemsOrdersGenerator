@@ -631,6 +631,7 @@ namespace ItemsOrdersGenerator
 
             if (configPoints is null)
             {
+                Console.Clear();
                 Console.WriteLine("Введите количество точек (максимум " + maxPoints + " точек включительно)");
                 points = GetIntInRange(1, maxPoints);
             }
