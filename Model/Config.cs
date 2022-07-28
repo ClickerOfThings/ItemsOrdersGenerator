@@ -95,7 +95,7 @@ namespace ItemsOrdersGenerator.Model
         /// </summary>
         [JsonProperty]
         [Description("Промежуток времени от и до, в котором создаются позиции")]
-        [Format("чч:мм. Секунды не учитываются в работе программы")]
+        [Format("чч:мм. Секунды не учитываются в работе программы. Возможен ввод '24:00' для обозначения конца дня")]
         [JsonConverter(typeof(TimeSpanRangeTupleConverter))]
         [TimeSpanTupleMinValidation(0, 0)]
         public Tuple<TimeSpan, TimeSpan> TimeRange { get; set; }
@@ -105,6 +105,8 @@ namespace ItemsOrdersGenerator.Model
         /// </summary>
         [JsonProperty]
         [TimeSpanMinValidation(0, 0)]
+        [Description("Интервал между минимальным и максимальным временем")]
+        [Format("чч:мм. Секунды не учитываются в работе программы")]
         [JsonConverter(typeof(TimeSpanJsonConverter))]
         public TimeSpan? IntervalBetweenTimeRange { get; set; }
 

@@ -637,6 +637,7 @@ namespace ItemsOrdersGenerator
             }
             while (true)
             {
+                Console.Clear();
                 Console.WriteLine("Ввод данных для случайной генерации");
                 try
                 {
